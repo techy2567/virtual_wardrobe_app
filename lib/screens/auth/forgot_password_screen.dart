@@ -1,0 +1,81 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:virtual_wardrobe_app/screens/auth/forgot_password_controller.dart'; // Import the controller
+
+class ForgotPasswordScreen extends StatelessWidget {
+  const ForgotPasswordScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Inject the controller
+    final ForgotPasswordController controller = Get.put(ForgotPasswordController());
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Forgot Password'),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.background,
+      ),
+      backgroundColor: colorScheme.background,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text(
+                'Reset Your Password',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 40),
+              Text(
+                'Enter your email address to receive a password reset link.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: colorScheme.primary.withOpacity(0.8),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: controller.emailController, // Link to controller
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(Icons.email_outlined, color: colorScheme.primary.withOpacity(0.6)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: colorScheme.surface,
+                ),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: controller.sendResetLink, // Call controller's method
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary, // Button background color
+                  foregroundColor: colorScheme.background, // Button text color
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                child: const Text('Send Reset Link'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+} 
