@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
 
     return GetMaterialApp(
       title: 'Virtual Wardrobe App',
+      debugShowCheckedModeBanner: false, // Disable the debug banner
       theme: ThemeData(
         // Use a custom color scheme
         colorScheme: const ColorScheme.light(
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
           surface: lightBeige, // Use the light beige for card surfaces etc.
           // You can define other colors like onPrimary, onBackground, etc. as needed
         ),
+
         scaffoldBackgroundColor: lightBeige, // Set the background color of scaffolds
         appBarTheme: const AppBarTheme(
           backgroundColor: darkNavy,

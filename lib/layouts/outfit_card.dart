@@ -25,26 +25,33 @@ class OutfitCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.network(
-            imageUrl, // Use provided image URL
-            fit: BoxFit.cover,
-            height: 120, // Example height, adjust as needed
-            width: double.infinity, // Take full width of the card
-            // Add a placeholder or error widget if image fails to load
-            errorBuilder: (context, error, stackTrace) => Container(
-              color: colorScheme.surface,
-              child: Icon(Icons.broken_image, color: colorScheme.primary.withOpacity(0.6)),
-            ),
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Center(
-                child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                      : null,
+          Center(
+            child: FittedBox(
+              fit: BoxFit.fill,
+              child: Image.network(
+                imageUrl, // Use provided image URL
+                fit: BoxFit.cover,
+                height: 120, // Example height, adjust as needed
+                width: double.infinity, // Take full width of the card
+                // Add a placeholder or error widget if image fails to load
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: colorScheme.surface,
+                  child: Icon(Icons.broken_image,
+                      size: 120,
+                      color: colorScheme.primary.withOpacity(0.2)),
                 ),
-              );
-            },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  );
+                },
+              ),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
