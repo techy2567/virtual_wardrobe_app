@@ -296,7 +296,7 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
                const SizedBox(height: 16.0),
                // Horizontal item list
                SizedBox(
-                 height: 140, // Adjust height as needed for item cards, matching OutfitDetailsScreen
+                 height: 175, // Adjust height as needed for item cards, matching OutfitDetailsScreen
                  child: ListView.builder(
                    scrollDirection: Axis.horizontal,
                    itemCount: _dummyItems.length,
@@ -328,7 +328,7 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
                    crossAxisCount: 2, // 2 buttons per row
                    crossAxisSpacing: 16.0, // Spacing between columns
                    mainAxisSpacing: 16.0, // Spacing between rows
-                   childAspectRatio: 2.5, // Adjust aspect ratio of buttons
+                   childAspectRatio: 2.4, // Adjust aspect ratio of buttons
                  ),
                  itemCount: _weatherOptions.length,
                  itemBuilder: (context, index) {
