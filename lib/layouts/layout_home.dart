@@ -5,6 +5,7 @@ import 'package:virtual_wardrobe_app/layouts/weather_card.dart';
 
 import '../screens/myoutfits_screen.dart';
 import '../screens/outfit_details_screen.dart';
+import '../screens/weekly_challenge_screen.dart';
 import '../widgets/item_card.dart';
 import '../widgets/outfit_card.dart';
 import '../widgets/section_title.dart';
@@ -108,7 +109,7 @@ class LayoutHome extends StatelessWidget {
                               child: InkWell(
                                 onTap: () {
                                   // TODO: Navigate to weekly challenge screen
-                                  // Get.to(() => const WeeklyChallengeScreen());
+                                  Get.to(() => const WeeklyChallengeScreen());
                                 },
                                 borderRadius: BorderRadius.circular(16),
                                 child: Padding(

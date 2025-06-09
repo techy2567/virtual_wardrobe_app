@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:virtual_wardrobe_app/widgets/section_title.dart'; // Assuming SectionTitle is in widgets
 import 'package:virtual_wardrobe_app/widgets/item_card.dart'; // Import ItemCard
 
@@ -22,7 +25,9 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
       { 'imageUrl': 'https://via.placeholder.com/100/D3D3D3', 'title': 'Camel Shirt' },
       // Add other dummy items as needed
     ];
-
+ var _bottomImage;
+ var _centerImage;
+ var _topImage;
   final List<Map<String, dynamic>> _weatherOptions = [
     {'range': '-30° to -20°', 'condition': 'Extra cold'},
     {'range': '-20° to -10°', 'condition': 'Very cold'},
@@ -83,97 +88,146 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
                     children: [
                       // Image upload sections
                       Expanded(
-                        child: Row(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             // Top section
                             Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  border: Border.all(
-                                    color: colorScheme.primary.withOpacity(0.2),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+                                  if (pickedFile != null) {
+                                    setState(() {
+                                      _topImage = File(pickedFile.path);
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.surface,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(
+                                      color: colorScheme.primary.withOpacity(0.2),
+                                    ),
                                   ),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.add_photo_alternate,
-                                      size: 32,
-                                      color: colorScheme.primary,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Top',
-                                      style: TextStyle(
-                                        color: colorScheme.primary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
+                                  child: _topImage != null
+                                      ? Image.file(
+                                          _topImage!,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.add_photo_alternate,
+                                              size: 32,
+                                              color: colorScheme.primary,
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              'Top',
+                                              style: TextStyle(
+                                                color: colorScheme.primary,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(height: 8),
                             // Center section
                             Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  border: Border.all(
-                                    color: colorScheme.primary.withOpacity(0.2),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+                                  if (pickedFile != null) {
+                                    setState(() {
+                                      _centerImage = File(pickedFile.path);
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.surface,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(
+                                      color: colorScheme.primary.withOpacity(0.2),
+                                    ),
                                   ),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.add_photo_alternate,
-                                      size: 32,
-                                      color: colorScheme.primary,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Center',
-                                      style: TextStyle(
-                                        color: colorScheme.primary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
+                                  child: _centerImage != null
+                                      ? Image.file(
+                                          _centerImage!,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.add_photo_alternate,
+                                              size: 32,
+                                              color: colorScheme.primary,
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              'Center',
+                                              style: TextStyle(
+                                                color: colorScheme.primary,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(height: 8),
                             // Bottom section
                             Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  border: Border.all(
-                                    color: colorScheme.primary.withOpacity(0.2),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+                                  if (pickedFile != null) {
+                                    setState(() {
+                                      _bottomImage = File(pickedFile.path);
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.surface,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(
+                                      color: colorScheme.primary.withOpacity(0.2),
+                                    ),
                                   ),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.add_photo_alternate,
-                                      size: 32,
-                                      color: colorScheme.primary,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Bottom',
-                                      style: TextStyle(
-                                        color: colorScheme.primary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
+                                  child: _bottomImage != null
+                                      ? Image.file(
+                                          _bottomImage!,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.add_photo_alternate,
+                                              size: 32,
+                                              color: colorScheme.primary,
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              'Bottom',
+                                              style: TextStyle(
+                                                color: colorScheme.primary,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                 ),
                               ),
                             ),
