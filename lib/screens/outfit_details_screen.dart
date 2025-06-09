@@ -4,6 +4,7 @@ import 'package:virtual_wardrobe_app/widgets/info_card.dart'; // Import InfoCard
 import 'package:virtual_wardrobe_app/widgets/section_title.dart'; // Import SectionTitle
 // ignore: unused_import
 import 'package:virtual_wardrobe_app/widgets/item_card.dart'; // Import ItemCard
+import 'package:virtual_wardrobe_app/screens/donation_screen.dart'; // Import DonationScreen
 
 class OutfitDetailsScreen extends StatelessWidget {
   const OutfitDetailsScreen({super.key});
@@ -141,6 +142,37 @@ class OutfitDetailsScreen extends StatelessWidget {
               //      },
               //    ),
               //  ),
+               // Donation Section
+               SectionTitle(title: 'Donation'),
+               const SizedBox(height: 16.0),
+               ElevatedButton(
+                 onPressed: () {
+                   Get.to(() => const DonationScreen());
+                 },
+                 style: ElevatedButton.styleFrom(
+                   backgroundColor: colorScheme.primary,
+                   foregroundColor: colorScheme.background,
+                   minimumSize: const Size(double.infinity, 48.0), // Full width button
+                   shape: RoundedRectangleBorder(
+                     borderRadius: BorderRadius.circular(12.0),
+                   ),
+                   elevation: 2.0,
+                 ),
+                 child: const Row(
+                   mainAxisAlignment: MainAxisAlignment.center,
+                   children: [
+                     Icon(Icons.volunteer_activism),
+                     SizedBox(width: 8.0),
+                     Text(
+                       'Donate Clothes',
+                       style: TextStyle(
+                         fontSize: 16.0,
+                         fontWeight: FontWeight.bold,
+                       ),
+                     ),
+                   ],
+                 ),
+               ),
                const SizedBox(height: 24.0), // Spacing at the bottom
             ],
           ),
