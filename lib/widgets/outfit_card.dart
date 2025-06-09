@@ -25,26 +25,41 @@ class OutfitCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.network(
-            imageUrl, // Use provided image URL
-            fit: BoxFit.cover,
-            height: 120, // Example height, adjust as needed
-            width: double.infinity, // Take full width of the card
-            errorBuilder: (context, error, stackTrace) => Container(
-              color: colorScheme.surface,
-              child: Icon(Icons.broken_image, color: colorScheme.primary.withOpacity(0.6)),
+          SizedBox(
+            height: 120,
+            // Example height, adjust as needed
+            width: 120,
+            child: Image.network(
+              imageUrl, // Use provided image URL
+              fit: BoxFit.cover,
+              height: 120,
+              // Example height, adjust as needed
+              width: 120,
+              // Take full width of the card
+              errorBuilder:
+                  (context, error, stackTrace) => Image.asset(
+                    'assets/images/outfits/outfit1.jpeg',
+                    // color: colorScheme.primary.withOpacity(0.2),
+                    height: 120,
+                    // Example height, adjust as needed
+                    width: 120,
+                    fit: BoxFit.fitHeight,
+                  ),
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Center(
+                  child: CircularProgressIndicator(
+                    value:
+                        loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                  ),
+                );
+              },
             ),
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Center(
-                child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                      : null,
-                ),
-              );
-            },
           ),
+          Spacer(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
@@ -57,19 +72,25 @@ class OutfitCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0), // Fixed padding
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+            // Fixed padding
             child: Row(
-              children: colors.map((color) => Padding(
-                padding: const EdgeInsets.only(right: 4.0),
-                child: CircleAvatar(
-                  radius: 8,
-                  backgroundColor: color,
-                ),
-              )).toList(),
+              children:
+                  colors
+                      .map(
+                        (color) => Padding(
+                          padding: const EdgeInsets.only(right: 4.0),
+                          child: CircleAvatar(
+                            radius: 8,
+                            backgroundColor: color,
+                          ),
+                        ),
+                      )
+                      .toList(),
             ),
           ),
         ],
       ),
     );
   }
-} 
+}

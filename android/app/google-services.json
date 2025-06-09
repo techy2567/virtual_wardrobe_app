@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "909179088734",
+    "project_id": "virtual-wardrobe-db7a5",
+    "storage_bucket": "virtual-wardrobe-db7a5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:909179088734:android:c4804ec01f4ea4fe93e9cf",
+        "android_client_info": {
+          "package_name": "com.layyahdevs.virtual_wardrobe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCT9jOpIUxdgK8imr-ucMsOlktZAksx5GY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

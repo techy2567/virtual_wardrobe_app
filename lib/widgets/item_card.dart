@@ -21,16 +21,18 @@ class ItemCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias, // Clip the image to the rounded corners
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Image.network(
             imageUrl, // Use provided image URL
             fit: BoxFit.cover,
-            height: 100, // Example height, adjust as needed
             width: double.infinity, // Take full width of the card
             errorBuilder: (context, error, stackTrace) => Container(
               color: colorScheme.surface,
-              child: Icon(Icons.broken_image, color: colorScheme.primary.withOpacity(0.6)),
+              child: Image.asset("assets/images/items/item1.jpeg", fit: BoxFit.cover,
+                // height: 100, // Example height, adjust as needed
+                width: double.infinity, // Take full width of the card
+                ),
             ),
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;

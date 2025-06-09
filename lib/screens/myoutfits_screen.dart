@@ -89,7 +89,7 @@ class MyOutfitsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox( // Container for filter buttons
-            height: 50.0, // Adjust height as needed
+            height: 120, // Adjust height as needed
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: outfitFilters.length,

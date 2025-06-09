@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:virtual_wardrobe_app/controllers/auth_controller.dart';
 import 'package:virtual_wardrobe_app/screens/auth/forgot_password_screen.dart';
-import 'package:virtual_wardrobe_app/screens/auth/signin_controller.dart'; // Import the controller
-import 'package:virtual_wardrobe_app/screens/home_screen.dart'; // Import HomeScreen
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Inject the controller
-    final SigninController controller = Get.put(SigninController());
+    final AuthController controller = Get.find();
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -20,11 +18,10 @@ class SignInScreen extends StatelessWidget {
         foregroundColor: colorScheme.background,
       ),
       backgroundColor: colorScheme.background,
-      body: Center(
+      body: Obx(() => Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
@@ -37,8 +34,10 @@ class SignInScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 40),
+
+              /// Email Field
               TextField(
-                controller: controller.emailController, // Link to controller
+                controller: controller.emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   prefixIcon: Icon(Icons.email_outlined, color: colorScheme.primary.withOpacity(0.6)),
@@ -52,12 +51,14 @@ class SignInScreen extends StatelessWidget {
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 20),
+
+              /// Password Field
               TextField(
-                controller: controller.passwordController, // Link to controller
+                controller: controller.passwordController,
                 decoration: InputDecoration(
                   labelText: 'Password',
-                   prefixIcon: Icon(Icons.lock_outline, color: colorScheme.primary.withOpacity(0.6)),
-                   border: OutlineInputBorder(
+                  prefixIcon: Icon(Icons.lock_outline, color: colorScheme.primary.withOpacity(0.6)),
+                  border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                     borderSide: BorderSide.none,
                   ),
@@ -66,30 +67,55 @@ class SignInScreen extends StatelessWidget {
                 ),
                 obscureText: true,
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 10),
+
+              /// Error Message
+              if (controller.errorMessage.value != null)
+                Text(
+                  controller.errorMessage.value!,
+                  style: TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
+
+              const SizedBox(height: 30),
+
+              /// Sign In Button
               ElevatedButton(
-                onPressed: () {
-                   // Call controller's signIn method (optional: move navigation inside controller)
-                   controller.signIn();
-                   // Navigate to HomeScreen and remove previous routes
-                   Get.offAll(() => const HomeScreen());
+                onPressed: controller.isLoading.value
+                    ? null
+                    : () {
+                  controller.loginWithEmailAndPassword(
+                    email: controller.emailController.text.trim(),
+                    password: controller.passwordController.text.trim(),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary, // Button background color
-                  foregroundColor: colorScheme.background, // Button text color
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.background,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                child: const Text('Sign In'),
+                child: controller.isLoading.value
+                    ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+                    : const Text('Sign In'),
               ),
-               const SizedBox(height: 20),
+
+              const SizedBox(height: 20),
+
+              /// Forgot Password
               TextButton(
                 onPressed: () {
-                  // Navigate to ForgotPasswordScreen using GetX
-                   Get.to(() => const ForgotPasswordScreen());
+                  Get.to(() => const ForgotPasswordScreen());
                 },
                 child: Text(
                   'Forgot Password?',
@@ -99,7 +125,7 @@ class SignInScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
-} 
+}

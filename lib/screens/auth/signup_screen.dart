@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:virtual_wardrobe_app/screens/auth/signup_controller.dart'; // Import the controller
+import 'package:virtual_wardrobe_app/controllers/auth_controller.dart';
 
-// Convert back to StatelessWidget as state is managed by GetX Controller
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Inject the controller
-    final SignupController controller = Get.put(SignupController());
+    final AuthController controller = Get.find<AuthController>();
     final colorScheme = Theme.of(context).colorScheme;
+
+    // Reset states when this screen is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.clearAuthState();
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -19,123 +22,159 @@ class SignUpScreen extends StatelessWidget {
         foregroundColor: colorScheme.background,
       ),
       backgroundColor: colorScheme.background,
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Text(
-                'Create Your Account',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 40),
-              TextField(
-                controller: controller.fullNameController, // Link to controller
-                decoration: InputDecoration(
-                  labelText: 'Full Name',
-                  prefixIcon: Icon(Icons.person_outline, color: colorScheme.primary.withOpacity(0.6)),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide.none,
+      body: Obx(
+        () => Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Text(
+                  'Create Your Account',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
                   ),
-                  filled: true,
-                  fillColor: colorScheme.surface,
                 ),
-                keyboardType: TextInputType.name,
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: controller.emailController, // Link to controller
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email_outlined, color: colorScheme.primary.withOpacity(0.6)),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide.none,
+                const SizedBox(height: 40),
+
+                TextField(
+                  controller: controller.fullNameController,
+                  decoration: InputDecoration(
+                    labelText: 'Full Name',
+                    prefixIcon: Icon(
+                      Icons.person_outline,
+                      color: colorScheme.primary.withOpacity(0.6),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: colorScheme.surface,
                   ),
-                  filled: true,
-                  fillColor: colorScheme.surface,
                 ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: controller.passwordController, // Link to controller
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                   prefixIcon: Icon(Icons.lock_outline, color: colorScheme.primary.withOpacity(0.6)),
-                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide.none,
+                const SizedBox(height: 20),
+
+                TextField(
+                  controller: controller.emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon: Icon(
+                      Icons.email_outlined,
+                      color: colorScheme.primary.withOpacity(0.6),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: colorScheme.surface,
                   ),
-                  filled: true,
-                  fillColor: colorScheme.surface,
+                  keyboardType: TextInputType.emailAddress,
                 ),
-                obscureText: true,
-              ),
-              // const SizedBox(height: 20),
-              //  TextField(
-              //   controller: controller.confirmPasswordController, // Link to controller
-              //   decoration: InputDecoration(
-              //     labelText: 'Confirm Password',
-              //      prefixIcon: Icon(Icons.lock_reset_outlined, color: colorScheme.primary.withOpacity(0.6)),
-              //      border: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(8.0),
-              //       borderSide: BorderSide.none,
-              //     ),
-              //     filled: true,
-              //     fillColor: colorScheme.surface,
-              //   ),
-              //   obscureText: true,
-              // ),
-              const SizedBox(height: 20), // Add spacing before gender dropdown
-              // Use Obx to observe the selectedGender from the controller
-              Obx(() => DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  labelText: 'Gender',
-                  prefixIcon: Icon(Icons.transgender, color: colorScheme.primary.withOpacity(0.6)),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide.none,
+                const SizedBox(height: 20),
+
+                TextField(
+                  controller: controller.passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: Icon(
+                      Icons.lock_outline,
+                      color: colorScheme.primary.withOpacity(0.6),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: colorScheme.surface,
                   ),
-                  filled: true,
-                  fillColor: colorScheme.surface,
+                  obscureText: true,
                 ),
-                value: controller.selectedGender.value, // Use controller's observable value
-                hint: const Text('Select Gender'),
-                onChanged: controller.setSelectedGender, // Use controller's method
-                items: controller.genderOptions.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              )),
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: controller.signUp, // Call controller's signUp method
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary, // Button background color
-                  foregroundColor: colorScheme.background, // Button text color
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                const SizedBox(height: 20),
+
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    labelText: 'Gender',
+                    prefixIcon: Icon(
+                      Icons.transgender,
+                      color: colorScheme.primary.withOpacity(0.6),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: colorScheme.surface,
                   ),
-                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  value: controller.selectedGender.value,
+                  onChanged: controller.setSelectedGender,
+                  items:
+                      controller.genderOptions.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
                 ),
-                child: const Text('Sign Up'),
-              ),
-            ],
+                const SizedBox(height: 30),
+
+                if (controller.errorMessage.value != null &&
+                    controller.errorMessage.value!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      controller.errorMessage.value!,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                ElevatedButton(
+                  onPressed:
+                      controller.isLoading.value
+                          ? null
+                          : () {
+                            controller.registerWithEmailAndPassword(
+                              email: controller.emailController.text,
+                              password: controller.passwordController.text,
+                              name: controller.fullNameController.text,
+                            );
+                          },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.background,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  child:
+                      controller.isLoading.value
+                          ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                          : const Text('Sign Up'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-} 
+}
