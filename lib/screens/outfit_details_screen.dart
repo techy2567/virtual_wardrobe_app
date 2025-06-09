@@ -5,6 +5,7 @@ import 'package:virtual_wardrobe_app/widgets/section_title.dart'; // Import Sect
 // ignore: unused_import
 import 'package:virtual_wardrobe_app/widgets/item_card.dart'; // Import ItemCard
 import 'package:virtual_wardrobe_app/screens/donation_screen.dart'; // Import DonationScreen
+import 'package:virtual_wardrobe_app/screens/tailor_screen.dart';
 
 class OutfitDetailsScreen extends StatelessWidget {
   const OutfitDetailsScreen({super.key});
@@ -165,6 +166,36 @@ class OutfitDetailsScreen extends StatelessWidget {
                      SizedBox(width: 8.0),
                      Text(
                        'Donate Clothes',
+                       style: TextStyle(
+                         fontSize: 16.0,
+                         fontWeight: FontWeight.bold,
+                       ),
+                     ),
+                   ],
+                 ),
+               ),
+               SectionTitle(title: 'Find Tailor'),
+               const SizedBox(height: 16.0),
+               ElevatedButton(
+                 onPressed: () {
+                   Get.to(() => const TailorScreen());
+                 },
+                 style: ElevatedButton.styleFrom(
+                   backgroundColor: colorScheme.primary,
+                   foregroundColor: colorScheme.background,
+                   minimumSize: const Size(double.infinity, 48.0), // Full width button
+                   shape: RoundedRectangleBorder(
+                     borderRadius: BorderRadius.circular(12.0),
+                   ),
+                   elevation: 2.0,
+                 ),
+                 child: const Row(
+                   mainAxisAlignment: MainAxisAlignment.center,
+                   children: [
+                     Icon(Icons.content_cut),
+                     SizedBox(width: 8.0),
+                     Text(
+                       'Find a Tailor',
                        style: TextStyle(
                          fontSize: 16.0,
                          fontWeight: FontWeight.bold,

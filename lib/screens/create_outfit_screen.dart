@@ -70,36 +70,130 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
             children: <Widget>[
               // Main Outfit Image Section
               Card(
-                 elevation: 2.0,
-                 shape: RoundedRectangleBorder(
-                   borderRadius: BorderRadius.circular(16.0),
-                 ),
-                 clipBehavior: Clip.antiAlias,
+                elevation: 2.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                ),
+                clipBehavior: Clip.antiAlias,
                 child: Container(
-                   height: 300, // Adjust height as needed
-                   width: double.infinity,
-                   color: colorScheme.surface, // Placeholder background
-                   child: Stack(
-                     children: [
-                       // TODO: Display selected outfit items image here
-                       Center(
-                         child: Text(
-                           'Outfit Image Placeholder',
-                           style: TextStyle(color: colorScheme.primary.withOpacity(0.6)),
-                         ),
-                       ),
-                        Positioned(
-                         top: 16.0,
-                         right: 16.0,
-                         child: IconButton(
-                           icon: Icon(Icons.qr_code_scanner, color: colorScheme.primary.withOpacity(0.8)),
-                           onPressed: () {
-                             // TODO: Implement scan logic
-                           },
-                         ),
-                       ),
-                     ],
-                   ),
+                  height: 400, // Increased height to accommodate multiple images
+                  width: double.infinity,
+                  color: colorScheme.surface,
+                  child: Column(
+                    children: [
+                      // Image upload sections
+                      Expanded(
+                        child: Row(
+                          children: [
+                            // Top section
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  border: Border.all(
+                                    color: colorScheme.primary.withOpacity(0.2),
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.add_photo_alternate,
+                                      size: 32,
+                                      color: colorScheme.primary,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Top',
+                                      style: TextStyle(
+                                        color: colorScheme.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            // Center section
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  border: Border.all(
+                                    color: colorScheme.primary.withOpacity(0.2),
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.add_photo_alternate,
+                                      size: 32,
+                                      color: colorScheme.primary,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Center',
+                                      style: TextStyle(
+                                        color: colorScheme.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            // Bottom section
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  border: Border.all(
+                                    color: colorScheme.primary.withOpacity(0.2),
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.add_photo_alternate,
+                                      size: 32,
+                                      color: colorScheme.primary,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Bottom',
+                                      style: TextStyle(
+                                        color: colorScheme.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Image requirements text
+                      Container(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Image requirements: Max size 1MB, PNG format recommended for background removal',
+                          style: TextStyle(
+                            color: colorScheme.primary.withOpacity(0.6),
+                            fontSize: 12,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 24.0),
