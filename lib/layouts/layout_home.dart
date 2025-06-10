@@ -56,7 +56,7 @@ class LayoutHome extends StatelessWidget {
           style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold), // Dark navy color
         ),
         backgroundColor: colorScheme.background, // Light beige background
-        elevation: 0,
+        elevation: 1,
         actions: [
           IconButton(
             icon: Icon(Icons.arrow_forward_ios, color: colorScheme.primary), // Arrow icon
