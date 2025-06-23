@@ -3,9 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:virtual_wardrobe_app/screens/home_screen.dart';
 import 'package:virtual_wardrobe_app/widgets/section_title.dart'; // Assuming SectionTitle is in widgets
 import 'package:virtual_wardrobe_app/widgets/item_card.dart'; // Import ItemCard
 import 'package:virtual_wardrobe_app/controllers/controller_create_outfit.dart';
+import 'package:path_provider/path_provider.dart';
+import '../layouts/layout_home.dart';
 
 class CreateOutfitScreen extends StatefulWidget {
    CreateOutfitScreen({super.key});
@@ -45,17 +48,38 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: SizedBox(
+      floatingActionButton: Obx(() => SizedBox(
           width: Get.width,
-          child: ElevatedButton(onPressed: (){},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-              ),
-
-              child: Text('Create Now',style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-              ),)).marginSymmetric(horizontal: 20)),
+          child: ElevatedButton(
+            onPressed: controller.isLoading.value
+                ? null
+                : () async {
+                    final success = await controller.saveOutfit();
+                    if (success) {
+                      Get.offAll(() => HomeScreen());
+                    }
+                  },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+            ),
+            child: controller.isLoading.value
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Text('Creating...', style: TextStyle(color: Colors.white, fontSize: 18)),
+                    ],
+                  )
+                : Text('Create Now', style: TextStyle(color: Colors.white, fontSize: 18)),
+          ).marginSymmetric(horizontal: 20))),
       appBar: AppBar(
         leading: IconButton(
           icon:   Icon(Icons.arrow_back_ios),
@@ -68,17 +92,6 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
         ),
         backgroundColor: colorScheme.background,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon:   Icon(Icons.check),
-            color: colorScheme.primary,
-            onPressed: () async {
-              final success = await controller.saveOutfit();
-              if (success) Get.back();
-            },
-            tooltip: 'Save Outfit',
-          ),
-        ],
       ),
       backgroundColor: colorScheme.background,
       body: SingleChildScrollView(
@@ -384,5 +397,28 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
         ),
       ),
     );
+  }
+
+  Future<String?> _saveImageLocally(File imageFile) async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final ext = imageFile.path.split('.').last;
+      final imageId = '$timestamp.$ext';
+      final localPath = '${dir.path}/$imageId';
+      // Debug log
+      print('Saving image to: ' + localPath);
+      final savedFile = await imageFile.copy(localPath);
+      if (await savedFile.exists()) {
+        return imageId;
+      } else {
+        print('File not saved at: ' + localPath);
+        return null;
+      }
+    } catch (e) {
+      print('Error saving image locally: $e');
+      Get.snackbar('Image Save Error', 'Failed to save image locally. Please check storage permissions.');
+      return null;
+    }
   }
 }

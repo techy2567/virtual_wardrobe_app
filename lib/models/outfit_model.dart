@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class OutfitModel {
   final String id; // Firebase document ID
+  final String userId;
   final String title;
   final String description;
   final String imageId; // Local image file identifier
@@ -15,6 +16,7 @@ class OutfitModel {
 
   OutfitModel({
     required this.id,
+    required this.userId,
     required this.title,
     required this.description,
     required this.imageId,
@@ -29,7 +31,8 @@ class OutfitModel {
 
   factory OutfitModel.fromJson(Map<String, dynamic> json, {String? documentId}) {
     return OutfitModel(
-      id: documentId ?? json['id'] as String,
+      id: documentId ?? json['id'] as String? ??'',
+      userId: json['userId'] as String? ?? '',
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       imageId: json['imageId'] as String? ?? '',
@@ -47,6 +50,7 @@ class OutfitModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'userId': userId,
       'title': title,
       'description': description,
       'imageId': imageId,
@@ -62,6 +66,7 @@ class OutfitModel {
 
   OutfitModel copyWith({
     String? id,
+    String? userId,
     String? title,
     String? description,
     String? imageId,
@@ -75,6 +80,7 @@ class OutfitModel {
   }) {
     return OutfitModel(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       title: title ?? this.title,
       description: description ?? this.description,
       imageId: imageId ?? this.imageId,

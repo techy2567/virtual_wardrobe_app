@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:virtual_wardrobe_app/widgets/outfit_card.dart'; // Import OutfitCard from widgets folder
-import 'package:virtual_wardrobe_app/screens/create_outfit_screen.dart'; // Import CreateOutfitScreen
+import 'package:virtual_wardrobe_app/screens/create_outfit_screen.dart';
+
+import '../models/outfit_model.dart'; // Import CreateOutfitScreen
 
 // Removed temporary OutfitCard definition
 
@@ -141,12 +143,9 @@ class MyOutfitsScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final outfit = dummyOutfits[index];
                       return OutfitCard(
-                        imageUrl: outfit['imageUrl'],
-                        title: outfit['title'],
-                        colors: outfit['colors'],
                         onTap: () {
                           // TODO: Navigate to outfit details
-                        },
+                        }, outfit: OutfitModel.fromJson(outfit)
                       );
                     },
                   ),

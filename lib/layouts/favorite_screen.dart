@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../models/outfit_model.dart';
 import '../screens/outfit_details_screen.dart';
 import '../widgets/outfit_card.dart';
 
@@ -63,12 +64,9 @@ class FavoriteScreen extends StatelessWidget {
                       );
                     },
                     child: OutfitCard(
-                      imageUrl: outfit['imageUrl'],
-                      title: outfit['title'],
-                      colors: outfit['colors'],
+
                       isFavorite: controller.favoriteTitles.contains(outfit['title']),
-                      onFavorite: () => controller.toggleFavorite(outfit['title']),
-                    ),
+                      onFavorite: () => controller.toggleFavorite(outfit['title']), outfit: OutfitModel.fromJson(outfit)),
                   );
                 },
               ),

@@ -1,14 +1,17 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:virtual_wardrobe_app/layouts/weather_card.dart';
+import 'package:virtual_wardrobe_app/models/outfit_model.dart';
 import 'dart:ui';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import '../controllers/controller_create_outfit.dart';
 import '../screens/create_outfit_screen.dart';
-import '../screens/myoutfits_screen.dart';
 import '../screens/outfit_details_screen.dart';
 import '../screens/weekly_challenge_screen.dart';
-import '../widgets/item_card.dart';
 import '../widgets/outfit_card.dart';
 import '../widgets/section_title.dart';
 import '../controllers/controller_weather.dart';
@@ -27,6 +30,8 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
   late final AnimationController _itemsAnim;
   // Favorite state
   final Set<String> _favoriteTitles = {};
+  late Future<List<OutfitModel>> _myOutfitsFuture;
+  late WeatherController weatherController;
 
   @override
   void initState() {
@@ -39,6 +44,8 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
     Future.delayed(Duration(milliseconds: 200), () => _challengeAnim.forward());
     Future.delayed(Duration(milliseconds: 400), () => _outfitsAnim.forward());
     Future.delayed(Duration(milliseconds: 600), () => _itemsAnim.forward());
+    weatherController = Get.put(WeatherController());
+    _myOutfitsFuture = fetchMyOutfits();
   }
 
   @override
@@ -50,56 +57,44 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  Future<List<OutfitModel>> fetchMyOutfits() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return [];
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('outfits')
+          .orderBy('createdAt', descending: true)
+          .get();
+      return snapshot.docs.map((doc) => OutfitModel.fromJson(doc.data(), documentId: doc.id)).toList();
+    } catch (e) {
+      print('Error fetching outfits: $e');
+      return [];
+    }
+  }
+
+  Future<void> _refreshOutfits() async {
+    setState(() {
+      _myOutfitsFuture = fetchMyOutfits();
+    });
+    await weatherController.getCurrentLocationAndFetchWeather();
+  }
+
+  List<OutfitModel> getRecommendedOutfits(List<OutfitModel> outfits) {
+    final temp = weatherController.weatherData.value?.temperature ?? 0.0;
+    // Example: recommend outfits for current temperature
+    return outfits.where((o) {
+      if (o.weatherRange.contains('Hot') && temp > 25) return true;
+      if (o.weatherRange.contains('Warm') && temp > 15 && temp <= 25) return true;
+      if (o.weatherRange.contains('Cold') && temp < 10) return true;
+      return false;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final WeatherController weatherController = Get.put(WeatherController());
-    // Dummy data for demonstration
-    final List<Map<String, dynamic>> dummyOutfits = [
-      {
-        'imageUrl': 'https://via.placeholder.com/150/FF0000', // Placeholder image URL
-        'title': 'Casual',
-        'colors': [Colors.brown, Colors.grey, Colors.blueGrey, Colors.black, Colors.blue],
-      },
-      {
-        'imageUrl': 'https://via.placeholder.com/150/00FF00', // Placeholder image URL
-        'title': 'Classic',
-        'colors': [Colors.brown, Colors.blueGrey, Colors.green, Colors.brown, Colors.amber],
-      },
-      {
-        'imageUrl': 'https://via.placeholder.com/150/0000FF', // Placeholder image URL
-        'title': 'Sporty',
-        'colors': [Colors.red, Colors.white, Colors.black],
-      },
-    ];
-    // Recommended Outfits dummy data
-    final List<Map<String, dynamic>> recommendedOutfits = [
-      {
-        'imageUrl': 'https://via.placeholder.com/150/FF5733',
-        'title': 'Holiday',
-        'colors': [Colors.red, Colors.green, Colors.white, Colors.yellow],
-      },
-      {
-        'imageUrl': 'https://via.placeholder.com/150/33FF57',
-        'title': 'Evening',
-        'colors': [Colors.black, Colors.red, Colors.grey],
-      },
-      {
-        'imageUrl': 'https://via.placeholder.com/150/3357FF',
-        'title': 'Summer',
-        'colors': [Colors.yellow, Colors.blue, Colors.white],
-      },
-      {
-        'imageUrl': 'https://via.placeholder.com/150/FF33FF',
-        'title': 'Trendy',
-        'colors': [Colors.purple, Colors.pink, Colors.white],
-      },
-      {
-        'imageUrl': 'https://via.placeholder.com/150/33FFFF',
-        'title': 'Winter',
-        'colors': [Colors.blueGrey, Colors.white, Colors.black],
-      },
-    ];
     return Scaffold(
       floatingActionButton: FloatingActionButton(onPressed: (){
         Get.to(CreateOutfitScreen());
@@ -129,9 +124,7 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
       body: LayoutBuilder(
         builder: (context, constraints) {
           return RefreshIndicator(
-            onRefresh: () async {
-              await weatherController.getCurrentLocationAndFetchWeather();
-            },
+            onRefresh: _refreshOutfits,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               child: Padding(
@@ -258,64 +251,101 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
                           SectionTitle(
                             key: Key('myOutfitsTitle'),
                             title: 'My Outfits',
-                            onAddPressed: () {},
-                            onViewAllPressed: () {},
+                            onAddPressed: () => Get.to(CreateOutfitScreen()),
+                            onViewAllPressed: null,
                           ),
                           const SizedBox(height: 18.0),
-                          // Outfits List with animation
-                          AnimatedBuilder(
-                            animation: _itemsAnim,
-                            builder: (context, child) => Opacity(
-                              opacity: _itemsAnim.value,
-                              child: Transform.translate(
-                                offset: Offset(0, 40 * (1 - _itemsAnim.value)),
-                                child: child,
-                              ),
-                            ),
-                            child: SizedBox(
-                              height: 180,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: recommendedOutfits.length,
-                                itemBuilder: (context, index) {
-                                  final outfit = recommendedOutfits[index];
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 16.0),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (_) => OutfitDetailsScreen(),
-                                          ),
-                                        );
-                                      },
-                                      child: AnimatedScale(
-                                        scale: 1.0,
-                                        duration: Duration(milliseconds: 180),
-                                        child: SizedBox(
-                                          width: 130,
-                                          child: OutfitCard(
-                                            imageUrl: outfit['imageUrl'],
-                                            title: outfit['title'],
-                                            colors: outfit['colors'],
-                                            isFavorite: _favoriteTitles.contains(outfit['title']),
-                                            onFavorite: () {
-                                              setState(() {
-                                                if (_favoriteTitles.contains(outfit['title'])) {
-                                                  _favoriteTitles.remove(outfit['title']);
-                                                } else {
-                                                  _favoriteTitles.add(outfit['title']);
-                                                }
-                                              });
-                                            },
+                          FutureBuilder<List<OutfitModel>>(
+                            future: _myOutfitsFuture,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return Skeletonizer(
+                                  enabled: true,
+                                  child: SizedBox(
+                                    height: 290,
+                                    child: ListView.separated(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: 3,
+                                      separatorBuilder: (_, __) => SizedBox(width: 16),
+                                      itemBuilder: (context, index) => SizedBox(
+                                        // width: 180,
+                                        child: OutfitCard(
+                                          outfit: OutfitModel(
+                                            id: '',
+                                            userId: '',
+                                            title: '',
+                                            description: '',
+                                            imageId: '',
+                                            categories: [''],
+                                            clothingType: '',
+                                            weatherRange: '',
+                                            season: '',
+                                            isFavorite: false,
+                                            isDonated: false,
+                                            createdAt: DateTime.now(),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
-                            ),
+                                  ),
+                                );
+                              }
+                              if (snapshot.hasError) {
+                                return Center(child: Text('Failed to load outfits.'));
+                              }
+                              final outfits = snapshot.data ?? [];
+                              if (outfits.isEmpty) {
+                                return Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.access_time_filled_outlined, size: 48, color: colorScheme.primary.withOpacity(0.5)),
+                                      SizedBox(height: 12),
+                                      Text(
+                                        'No outfits found',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          color: colorScheme.primary.withOpacity(0.7),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        'Tap + to add your first outfit!',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: colorScheme.primary.withOpacity(0.5),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                              return SizedBox(
+                                height: 290,
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: outfits.length,
+                                  separatorBuilder: (_, __) => SizedBox(width: 16),
+                                  itemBuilder: (context, index) {
+                                    final outfit = outfits[index];
+                                    return FutureBuilder<File?>(
+                                      future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
+                                      builder: (context, imgSnapshot) {
+                                        final imageFile = imgSnapshot.data;
+                                        return SizedBox(
+                                          // width: 180,
+                                          child: OutfitCard(
+                                            outfit: outfit.copyWith(imageId: imageFile?.path ?? ''),
+                                            onTap: () => Get.to(() => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: imageFile?.path ?? ''))),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 28.0),
                           // Recommended Outfits Section Title
@@ -326,60 +356,98 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
                             onViewAllPressed: null,
                           ),
                           const SizedBox(height: 18.0),
-                          // Recommended Outfits List with animation
-                          AnimatedBuilder(
-                            animation: _itemsAnim,
-                            builder: (context, child) => Opacity(
-                              opacity: _itemsAnim.value,
-                              child: Transform.translate(
-                                offset: Offset(0, 40 * (1 - _itemsAnim.value)),
-                                child: child,
-                              ),
-                            ),
-                            child: SizedBox(
-                              height: 180,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: recommendedOutfits.length,
-                                itemBuilder: (context, index) {
-                                  final outfit = recommendedOutfits[index];
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 16.0),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (_) => OutfitDetailsScreen(),
-                                          ),
-                                        );
-                                      },
-                                      child: AnimatedScale(
-                                        scale: 1.0,
-                                        duration: Duration(milliseconds: 180),
-                                        child: SizedBox(
-                                          width: 130,
-                                          child: OutfitCard(
-                                            imageUrl: outfit['imageUrl'],
-                                            title: outfit['title'],
-                                            colors: outfit['colors'],
-                                            isFavorite: _favoriteTitles.contains(outfit['title']),
-                                            onFavorite: () {
-                                              setState(() {
-                                                if (_favoriteTitles.contains(outfit['title'])) {
-                                                  _favoriteTitles.remove(outfit['title']);
-                                                } else {
-                                                  _favoriteTitles.add(outfit['title']);
-                                                }
-                                              });
-                                            },
+                          FutureBuilder<List<OutfitModel>>(
+                            future: _myOutfitsFuture,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return Skeletonizer(
+                                  enabled: true,
+                                  child: SizedBox(
+                                    height: 290,
+                                    child: ListView.separated(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: 3,
+                                      separatorBuilder: (_, __) => SizedBox(width: 16),
+                                      itemBuilder: (context, index) => SizedBox(
+                                        // width: 180,
+                                        child: OutfitCard(
+                                          outfit: OutfitModel(
+                                            id: '',
+                                            userId: '',
+                                            title: '',
+                                            description: '',
+                                            imageId: '',
+                                            categories: [''],
+                                            clothingType: '',
+                                            weatherRange: '',
+                                            season: '',
+                                            isFavorite: false,
+                                            isDonated: false,
+                                            createdAt: DateTime.now(),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
-                            ),
+                                  ),
+                                );
+                              }
+                              if (snapshot.hasError) {
+                                return Center(child: Text('Failed to load recommended outfits.'));
+                              }
+                              final outfits = getRecommendedOutfits(snapshot.data ?? []);
+                              if (outfits.isEmpty) {
+                                return Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.recommend, size: 48, color: colorScheme.primary.withOpacity(0.5)),
+                                      SizedBox(height: 12),
+                                      Text(
+                                        'No recommended outfits',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          color: colorScheme.primary.withOpacity(0.7),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        'Try adding more outfits for better recommendations.',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: colorScheme.primary.withOpacity(0.5),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                              return SizedBox(
+                                height: 290,
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: outfits.length,
+                                  separatorBuilder: (_, __) => SizedBox(width: 16),
+                                  itemBuilder: (context, index) {
+                                    final outfit = outfits[index];
+                                    return FutureBuilder<File?>(
+                                      future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
+                                      builder: (context, imgSnapshot) {
+                                        final imageFile = imgSnapshot.data;
+                                        return SizedBox(
+                                          // width: 180,
+                                          child: OutfitCard(
+                                            outfit: outfit.copyWith(imageId: imageFile?.path ?? ''),
+                                            onTap: () => Get.to(() => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: imageFile?.path ?? ''))),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 32.0),
                         ],
