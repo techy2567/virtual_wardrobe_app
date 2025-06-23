@@ -6,10 +6,16 @@ class ControllerCreateOutfit extends GetxController {
   // State variables
   var outfitImage = Rx<File?>(null);
 
-  var selectedWeatherIndex = (-1).obs;
-  var selectedCategoryIndex = (-1).obs;
-  var selectedClothingTypeIndex = (-1).obs;
-  var selectedFilterIndex = (-1).obs;
+  // Value-based selection
+  RxString selectedWeather = ''.obs;
+  RxString selectedCategory = ''.obs;
+  RxString selectedClothingType = ''.obs;
+  RxString selectedSeason = ''.obs;
+
+  // New fields for OutfitModel
+  RxString title = ''.obs;
+  RxString description = ''.obs;
+  RxBool isDonated = false.obs;
 
   // Clothing types
   RxList<String> clothingTypes = <String>[
@@ -37,6 +43,7 @@ class ControllerCreateOutfit extends GetxController {
     {'range': '+20° to +30°', 'condition': 'Hot'},
   ].obs;
   RxList<String> categoryOptions = <String>['Classic', 'Sport', 'Casual', 'Festive', 'Home', 'Outside'].obs;
+  RxList<String> seasonOptions = <String>['Winter', 'Summer', 'Spring', 'Autumn'].obs;
 
   // Filtered items
   RxList<Map<String, dynamic>> filteredItems = <Map<String, dynamic>>[].obs;
@@ -50,9 +57,11 @@ class ControllerCreateOutfit extends GetxController {
 
   void setOutfitImage(File file) => outfitImage.value = file;
 
-  void selectWeather(int index) => selectedWeatherIndex.value = index;
-  void selectCategory(int index) => selectedCategoryIndex.value = index;
-  void selectClothingType(int index) => selectedClothingTypeIndex.value = index;
+  void selectWeather(String value) => selectedWeather.value = value;
+  void selectCategory(String value) => selectedCategory.value = value;
+  void selectClothingType(String value) => selectedClothingType.value = value;
+  void selectSeason(String value) => selectedSeason.value = value;
+  void toggleDonated(bool value) => isDonated.value = value;
 
   void updateClothingTypeSearch(String query) {
     clothingTypeSearch.value = query;
@@ -66,7 +75,6 @@ class ControllerCreateOutfit extends GetxController {
   }
 
   void filterItems(int index) {
-    selectedFilterIndex.value = index;
     // Example: filter logic (replace with real logic)
     if (index == 0) {
       filteredItems.assignAll(dummyItems);
@@ -91,16 +99,24 @@ class ControllerCreateOutfit extends GetxController {
       Get.snackbar('Validation', 'Please upload an outfit image.');
       return false;
     }
-    if (selectedWeatherIndex.value == -1) {
+    if (selectedWeather.value.isEmpty) {
       Get.snackbar('Validation', 'Please select a weather option.');
       return false;
     }
-    if (selectedCategoryIndex.value == -1) {
+    if (selectedCategory.value.isEmpty) {
       Get.snackbar('Validation', 'Please select a category.');
       return false;
     }
-    if (selectedClothingTypeIndex.value == -1) {
+    if (selectedClothingType.value.isEmpty) {
       Get.snackbar('Validation', 'Please select a clothing type.');
+      return false;
+    }
+    if (title.value.trim().isEmpty) {
+      Get.snackbar('Validation', 'Please enter a title.');
+      return false;
+    }
+    if (selectedSeason.value.isEmpty) {
+      Get.snackbar('Validation', 'Please select a season.');
       return false;
     }
     // Simulate save

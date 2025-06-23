@@ -1,214 +1,208 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:virtual_wardrobe_app/widgets/info_card.dart'; // Import InfoCard and ColorInfoCard
-import 'package:virtual_wardrobe_app/widgets/section_title.dart'; // Import SectionTitle
-// ignore: unused_import
-import 'package:virtual_wardrobe_app/widgets/item_card.dart'; // Import ItemCard
-import 'package:virtual_wardrobe_app/screens/donation_screen.dart'; // Import DonationScreen
+import 'package:virtual_wardrobe_app/models/outfit_model.dart';
+import 'dart:io';
+import 'package:intl/intl.dart';
+import 'package:virtual_wardrobe_app/screens/donation_screen.dart';
 import 'package:virtual_wardrobe_app/screens/tailor_screen.dart';
 
 class OutfitDetailsScreen extends StatelessWidget {
-  const OutfitDetailsScreen({super.key});
+  final OutfitModel? outfit;
+  const OutfitDetailsScreen({Key? key, this.outfit}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final dateFormat = DateFormat('MMM d, yyyy');
 
-     // Dummy data for a single outfit for demonstration
-    final Map<String, dynamic> dummyOutfitDetails = {
-      'imageUrl': 'https://via.placeholder.com/400x300/CCCCCC', // Placeholder image URL (adjusted size)
-      'price': '\$113.00',
-      'weather': '+10° to -10°',
-      'category': 'Casual',
-      'colors': [Colors.grey, Colors.blueGrey, Colors.black, Colors.blueGrey.shade100],
-      'usedItems': [
-        {
-          'imageUrl': 'https://via.placeholder.com/100/808080', // Placeholder (adjusted size)
-          'title': 'Coat',
-        },
-        {
-          'imageUrl': 'https://via.placeholder.com/100/A9A9A9', // Placeholder (adjusted size)
-          'title': 'Sweater',
-        },
-         {
-          'imageUrl': 'https://via.placeholder.com/100/D3D3D3', // Placeholder (adjusted size)
-          'title': 'Jeans',
-        },
-         {
-          'imageUrl': 'https://via.placeholder.com/100/FFFFFF', // Placeholder (adjusted size)
-          'title': 'Shoes',
-        },
-      ],
-    };
+    // Fallbacks if outfit is null
+    final String title = outfit?.title ?? 'Outfit Title';
+    final String description = outfit?.description ?? 'No description available.';
+    final String category = outfit?.categories.join(', ') ?? 'N/A';
+    final String clothingType = outfit?.clothingType ?? 'N/A';
+    final String weather = outfit?.weatherRange ?? 'N/A';
+    final String season = outfit?.season ?? 'N/A';
+    final String donated = (outfit?.isDonated ?? false) ? 'Yes' : 'No';
+    final String created = outfit != null ? dateFormat.format(outfit!.createdAt) : dateFormat.format(DateTime.now());
+
+    final imageProvider = outfit?.imageId != null && outfit?.imageId != ''
+        ? FileImage(File(outfit!.imageId)) as ImageProvider
+        : AssetImage('assets/images/items/item1.jpeg');
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: colorScheme.primary), // Back arrow
-          onPressed: () {
-            Get.back(); // Navigate back using GetX
-          },
-        ),
-        title: Text(
-          'Outfit', // Title from image
-          style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold), // Dark navy color
-        ),
-        backgroundColor: colorScheme.background, // Light beige background
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: colorScheme.primary),
+          onPressed: () => Get.back(),
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.edit_outlined, color: colorScheme.primary), // Edit icon
+            icon: Icon(Icons.edit_outlined, color: colorScheme.primary),
             onPressed: () {
               // TODO: Implement edit outfit logic
             },
           ),
         ],
       ),
-      backgroundColor: colorScheme.background, // Light beige background for the whole screen
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // Main Outfit Image Section
-              Card(
-                 elevation: 2.0,
-                 shape: RoundedRectangleBorder(
-                   borderRadius: BorderRadius.circular(16.0),
-                 ),
-                 clipBehavior: Clip.antiAlias,
-                child: Image.network(
-                  dummyOutfitDetails['imageUrl'],
-                  fit: BoxFit.cover,
-                  height: 300, // Adjust height as needed to match image reference
-                  width: double.infinity,
-                   errorBuilder: (context, error, stackTrace) => Container(
-                     color: colorScheme.surface,
-                     child: Icon(Icons.broken_image, color: colorScheme.primary.withOpacity(0.6)),
-                   ),
-                   loadingBuilder: (context, child, loadingProgress) {
-                     if (loadingProgress == null) return child;
-                     return Center(
-                       child: CircularProgressIndicator(
-                         value: loadingProgress.expectedTotalBytes != null
-                             ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                             : null,
-                       ),
-                     );
-                   },
+      backgroundColor: colorScheme.background,
+      body: Stack(
+        alignment: Alignment.topCenter,
+
+        children: [
+          // Fullscreen Image with Hero animation
+          Hero(
+            tag: 'outfit_image_${outfit?.id ?? 'default'}',
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 600),
+                curve: Curves.easeInOut,
+                width: double.infinity,
+                height: Get.height*.6,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.fitHeight,
+                  ),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        colorScheme.background.withOpacity(0.92),
+                      ],
+                      stops: [0.5, 1.0],
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 24.0),
-
-              // Information Section
-              SectionTitle(title: 'Information'),
-              const SizedBox(height: 16.0),
-              GridView.count(
-                shrinkWrap: true, // Use shrinkWrap in Column to avoid unbounded height
-                physics: NeverScrollableScrollPhysics(), // Disable GridView's own scrolling
-                crossAxisCount: 2,
-                crossAxisSpacing: 16.0,
-                mainAxisSpacing: 16.0,
-                childAspectRatio: 1.8, // Adjust aspect ratio of info cards to match image
-                children: [
-                  InfoCard(label: 'Price', value: dummyOutfitDetails['price']),
-                  InfoCard(label: 'Weather', value: dummyOutfitDetails['weather']),
-                  InfoCard(label: 'Category', value: dummyOutfitDetails['category']),
-                  ColorInfoCard(label: 'Colors', colors: dummyOutfitDetails['colors']),
-                ],
-              ),
-              const SizedBox(height: 24.0),
-
-              // Used Items Section
-              // SectionTitle(title: 'Used Items ',trailingText: '${dummyOutfitDetails['usedItems'].length}',), // Include item count
-              // const SizedBox(height: 16.0),
-              //  SizedBox(
-              //    height: 140, // Adjust height as needed for item cards
-              //    child: ListView.builder(
-              //      scrollDirection: Axis.horizontal,
-              //      itemCount: dummyOutfitDetails['usedItems'].length,
-              //      itemBuilder: (context, index) {
-              //        final item = dummyOutfitDetails['usedItems'][index];
-              //        return Padding(
-              //          padding: const EdgeInsets.only(right: 16.0), // Spacing between cards
-              //          child: SizedBox(
-              //            width: 100, // Explicit width for item card to match image
-              //            child: ItemCard(
-              //              imageUrl: item['imageUrl'],
-              //              title: item['title'],
-              //            ),
-              //          ),
-              //        );
-              //      },
-              //    ),
-              //  ),
-               // Donation Section
-               SectionTitle(title: 'Donation'),
-               const SizedBox(height: 16.0),
-               ElevatedButton(
-                 onPressed: () {
-                   Get.to(() => const DonationScreen());
-                 },
-                 style: ElevatedButton.styleFrom(
-                   backgroundColor: colorScheme.primary,
-                   foregroundColor: colorScheme.background,
-                   minimumSize: const Size(double.infinity, 48.0), // Full width button
-                   shape: RoundedRectangleBorder(
-                     borderRadius: BorderRadius.circular(12.0),
-                   ),
-                   elevation: 2.0,
-                 ),
-                 child: const Row(
-                   mainAxisAlignment: MainAxisAlignment.center,
-                   children: [
-                     Icon(Icons.volunteer_activism),
-                     SizedBox(width: 8.0),
-                     Text(
-                       'Donate Clothes',
-                       style: TextStyle(
-                         fontSize: 16.0,
-                         fontWeight: FontWeight.bold,
-                       ),
-                     ),
-                   ],
-                 ),
-               ),
-               SectionTitle(title: 'Find Tailor'),
-               const SizedBox(height: 16.0),
-               ElevatedButton(
-                 onPressed: () {
-                   Get.to(() => const TailorScreen());
-                 },
-                 style: ElevatedButton.styleFrom(
-                   backgroundColor: colorScheme.primary,
-                   foregroundColor: colorScheme.background,
-                   minimumSize: const Size(double.infinity, 48.0), // Full width button
-                   shape: RoundedRectangleBorder(
-                     borderRadius: BorderRadius.circular(12.0),
-                   ),
-                   elevation: 2.0,
-                 ),
-                 child: const Row(
-                   mainAxisAlignment: MainAxisAlignment.center,
-                   children: [
-                     Icon(Icons.content_cut),
-                     SizedBox(width: 8.0),
-                     Text(
-                       'Find a Tailor',
-                       style: TextStyle(
-                         fontSize: 16.0,
-                         fontWeight: FontWeight.bold,
-                       ),
-                     ),
-                   ],
-                 ),
-               ),
-               const SizedBox(height: 24.0), // Spacing at the bottom
-            ],
+            ),
           ),
-        ),
+          // Details Bottom Sheet
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: AnimatedSlide(
+              offset: Offset(0, 0),
+              duration: Duration(milliseconds: 600),
+              curve: Curves.easeOut,
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: colorScheme.surface.withOpacity(0.95),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorScheme.primary.withOpacity(0.10),
+                      blurRadius: 24,
+                      offset: Offset(0, -8),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 48,
+                        height: 5,
+                        margin: const EdgeInsets.only(bottom: 18),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      description,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 18),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 8,
+                      children: [
+                        _InfoChip(label: 'Category', value: category),
+                        _InfoChip(label: 'Clothing Type', value: clothingType),
+                        _InfoChip(label: 'Weather', value: weather),
+                        _InfoChip(label: 'Season', value: season),
+                        _InfoChip(label: 'Donated', value: donated),
+                        _InfoChip(label: 'Created', value: created),
+                      ],
+                    ),
+                    const SizedBox(height: 28),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => Get.to(() => const DonationScreen()),
+                            icon: Icon(Icons.volunteer_activism),
+                            label: Text('Donate Clothes'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colorScheme.primary,
+                              foregroundColor: colorScheme.background,
+                              minimumSize: const Size(double.infinity, 48.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              elevation: 2.0,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => Get.to(() => const TailorScreen()),
+                            icon: Icon(Icons.content_cut),
+                            label: Text('Find a Tailor'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colorScheme.primary,
+                              foregroundColor: colorScheme.background,
+                              minimumSize: const Size(double.infinity, 48.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              elevation: 2.0,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  final String label;
+  final String value;
+  const _InfoChip({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Chip(
+      label: Text('$label: $value', style: TextStyle(fontWeight: FontWeight.w500)),
+      backgroundColor: colorScheme.primary.withOpacity(0.08),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     );
   }
 } 

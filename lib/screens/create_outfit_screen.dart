@@ -44,6 +44,18 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: SizedBox(
+          width: Get.width,
+          child: ElevatedButton(onPressed: (){},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+              ),
+
+              child: Text('Create Now',style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+              ),)).marginSymmetric(horizontal: 20)),
       appBar: AppBar(
         leading: IconButton(
           icon:   Icon(Icons.arrow_back_ios),
@@ -146,7 +158,150 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
                 style: TextStyle(fontSize: 12),
                 textAlign: TextAlign.center,
               ),
+
+              SizedBox(height: 24.0),
+              // Title Field
+              SectionTitle(title: 'Outfit Title'),
+              SizedBox(height: 8.0),
+              TextField(
+                decoration: InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  filled: true,
+                  fillColor: colorScheme.surface,
+                ),
+                onChanged: (value) => controller.title.value = value,
+              ),
+              SizedBox(height: 16.0),
+              // Description Field
+              SectionTitle(title: 'Description'),
+              SizedBox(height: 8.0),
+              TextField(
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  filled: true,
+                  fillColor: colorScheme.surface,
+                ),
+                maxLines: 2,
+                onChanged: (value) => controller.description.value = value,
+              ),
+              SizedBox(height: 24.0),
+              // Select Season Section
+              SectionTitle(title: 'Select Season'),
+              SizedBox(height: 16.0),
+              Obx(() {
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16.0,
+                    mainAxisSpacing: 16.0,
+                    childAspectRatio: 2.5,
+                  ),
+                  itemCount: controller.seasonOptions.length,
+                  itemBuilder: (context, index) {
+                    final season = controller.seasonOptions[index];
+                    final isSelected = controller.selectedSeason.value == season;
+                    return ElevatedButton(
+                      onPressed: () => controller.selectSeason(season),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isSelected ? colorScheme.primary : colorScheme.surface,
+                        foregroundColor: isSelected ? colorScheme.background : colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                          side: BorderSide(color: colorScheme.primary.withOpacity(0.5)),
+                        ),
+                        elevation: isSelected ? 2.0 : 0,
+                        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                      ),
+                      child: Text(season, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    );
+                  },
+                );
+              }),
                 SizedBox(height: 24.0),
+              // Select Weather Section
+              SectionTitle(title: 'Select Weather'),
+              SizedBox(height: 16.0),
+              Obx(() {
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16.0,
+                    mainAxisSpacing: 16.0,
+                    childAspectRatio: 2.4,
+                  ),
+                  itemCount: controller.weatherOptions.length,
+                  itemBuilder: (context, index) {
+                    final option = controller.weatherOptions[index];
+                    final value = option['range'] + ' - ' + option['condition'];
+                    final isSelected = controller.selectedWeather.value == value;
+                    return ElevatedButton(
+                      onPressed: () => controller.selectWeather(value),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isSelected ? colorScheme.primary : colorScheme.surface,
+                        foregroundColor: isSelected ? colorScheme.background : colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                          side: BorderSide(color: colorScheme.primary.withOpacity(0.5)),
+                        ),
+                        elevation: isSelected ? 2.0 : 0,
+                        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(option['range'], style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          Text(option['condition'], style: TextStyle(fontSize: 12, color: isSelected ? colorScheme.background.withOpacity(0.8) : colorScheme.primary.withOpacity(0.7))),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              }),
+              SizedBox(height: 24.0),
+              // Select Category Section
+              SectionTitle(title: 'Select Category'),
+              SizedBox(height: 16.0),
+              Obx(() {
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16.0,
+                    mainAxisSpacing: 16.0,
+                    childAspectRatio: 2.5,
+                  ),
+                  itemCount: controller.categoryOptions.length,
+                  itemBuilder: (context, index) {
+                    final category = controller.categoryOptions[index];
+                    final isSelected = controller.selectedCategory.value == category;
+                    return ElevatedButton(
+                      onPressed: () => controller.selectCategory(category),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isSelected ? colorScheme.primary : colorScheme.surface,
+                        foregroundColor: isSelected ? colorScheme.background : colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                          side: BorderSide(color: colorScheme.primary.withOpacity(0.5)),
+                        ),
+                        elevation: isSelected ? 2.0 : 0,
+                        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                      ),
+                      child: Text(category, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    );
+                  },
+                );
+              }),
               // Clothing Type Section
               SectionTitle(title: 'Select Clothing Type'),
                 SizedBox(height: 16.0),
@@ -154,16 +309,16 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
                 controller: searchController,
                 decoration: InputDecoration(
                   labelText: 'Search clothing type',
-                  prefixIcon:   Icon(Icons.search),
+                  prefixIcon: Icon(Icons.search),
                   suffixIcon: controller.clothingTypeSearch.value.isNotEmpty
                       ? IconButton(
-                          icon:   Icon(Icons.clear),
+                          icon: Icon(Icons.clear),
                           onPressed: () {
                             searchController.clear();
                             controller.updateClothingTypeSearch('');
                           },
                         )
-                      :   SizedBox.shrink(),
+                      : SizedBox.shrink(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -178,11 +333,11 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
               Obx(() {
                 final filtered = controller.filteredClothingTypes;
                 return filtered.isEmpty
-                    ?   Text('No clothing types found.')
+                    ? Text('No clothing types found.')
                     : GridView.builder(
                         shrinkWrap: true,
-                        physics:   NeverScrollableScrollPhysics(),
-                        gridDelegate:   SliverGridDelegateWithFixedCrossAxisCount(
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 16.0,
                           mainAxisSpacing: 16.0,
@@ -191,12 +346,10 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
                         itemCount: filtered.length,
                         itemBuilder: (context, index) {
                           final type = filtered[index];
-                          final isSelected = controller.selectedClothingTypeIndex.value != -1 &&
-                              controller.clothingTypes[controller.selectedClothingTypeIndex.value] == type;
+                          final isSelected = controller.selectedClothingType.value == type;
                           return ElevatedButton(
                             onPressed: () {
-                              final originalIndex = controller.clothingTypes.indexOf(type);
-                              controller.selectClothingType(originalIndex);
+                              controller.selectClothingType(type);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: isSelected ? colorScheme.primary : colorScheme.surface,
@@ -206,90 +359,26 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
                                 side: BorderSide(color: colorScheme.primary.withOpacity(0.5)),
                               ),
                               elevation: isSelected ? 2.0 : 0,
-                              padding:   EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
                             ),
-                            child: Text(type, style:   TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            child: Text(type, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           );
                         },
                       );
               }),
-                SizedBox(height: 24.0),
-              // Select Weather Section
-              SectionTitle(title: 'Select Weather'),
-                SizedBox(height: 16.0),
-              Obx(() {
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics:   NeverScrollableScrollPhysics(),
-                  gridDelegate:   SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16.0,
-                    mainAxisSpacing: 16.0,
-                    childAspectRatio: 2.4,
-                  ),
-                  itemCount: controller.weatherOptions.length,
-                  itemBuilder: (context, index) {
-                    final option = controller.weatherOptions[index];
-                    final isSelected = controller.selectedWeatherIndex.value == index;
-                    return ElevatedButton(
-                      onPressed: () => controller.selectWeather(index),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isSelected ? colorScheme.primary : colorScheme.surface,
-                        foregroundColor: isSelected ? colorScheme.background : colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          side: BorderSide(color: colorScheme.primary.withOpacity(0.5)),
-                        ),
-                        elevation: isSelected ? 2.0 : 0,
-                        padding:   EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(option['range'], style:   TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text(option['condition'], style: TextStyle(fontSize: 12, color: isSelected ? colorScheme.background.withOpacity(0.8) : colorScheme.primary.withOpacity(0.7))),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              }),
-                SizedBox(height: 24.0),
-              // Select Category Section
-              SectionTitle(title: 'Select Category'),
-                SizedBox(height: 16.0),
-              Obx(() {
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics:   NeverScrollableScrollPhysics(),
-                  gridDelegate:   SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16.0,
-                    mainAxisSpacing: 16.0,
-                    childAspectRatio: 2.5,
-                  ),
-                  itemCount: controller.categoryOptions.length,
-                  itemBuilder: (context, index) {
-                    final category = controller.categoryOptions[index];
-                    final isSelected = controller.selectedCategoryIndex.value == index;
-                    return ElevatedButton(
-                      onPressed: () => controller.selectCategory(index),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isSelected ? colorScheme.primary : colorScheme.surface,
-                        foregroundColor: isSelected ? colorScheme.background : colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          side: BorderSide(color: colorScheme.primary.withOpacity(0.5)),
-                        ),
-                        elevation: isSelected ? 2.0 : 0,
-                        padding:   EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-                      ),
-                      child: Text(category, style:   TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    );
-                  },
-                );
-              }),
-                SizedBox(height: 24.0),
+
+              SizedBox(height: 24.0),
+              // Donated Switch
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //   children: [
+              //     Text('Mark as Donated', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              //     Obx(() => Switch(
+              //           value: controller.isDonated.value,
+              //           onChanged: controller.toggleDonated,
+              //         )),
+              //   ],
+              // ),
             ],
           ),
         ),

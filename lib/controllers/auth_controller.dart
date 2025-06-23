@@ -41,7 +41,7 @@ class AuthController extends GetxController {
       Get.offAllNamed('/login');
     } else {
       // Reload user to get latest verification status
-      await user.reload();
+      // await user.reload();
       final currentUser = _auth.currentUser;
       if (currentUser != null && !currentUser.emailVerified) {
         Get.offAllNamed('/verify-email');
