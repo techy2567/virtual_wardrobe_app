@@ -103,35 +103,57 @@ class WeeklyChallengeScreen extends StatelessWidget {
                 itemCount: challenges.length,
                 itemBuilder: (context, index) {
                   final challenge = challenges[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 24),
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 32),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      color: colorScheme.surface,
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.primary.withOpacity(0.08),
+                          blurRadius: 18,
+                          offset: Offset(0, 8),
+                        ),
+                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Challenge image
-                        ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(16),
-                            topRight: Radius.circular(16),
-                          ),
-                          child: Image.network(
-                            challenge['image'],
-                            height: 200,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              height: 200,
-                              color: colorScheme.surface,
-                              child: Icon(Icons.image, size: 50, color: colorScheme.primary),
+                        // Challenge image (larger, centered)
+                        Center(
+                          child: Container(
+                            margin: const EdgeInsets.only(top: 18),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colorScheme.primary.withOpacity(0.12),
+                                  blurRadius: 16,
+                                  offset: Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.network(
+                                challenge['image'],
+                                height: 220,
+                                width: 340,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => Container(
+                                  height: 220,
+                                  width: 340,
+                                  color: colorScheme.surface,
+                                  child: Center(
+                                    child: Icon(Icons.image, size: 70, color: colorScheme.primary),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -139,45 +161,43 @@ class WeeklyChallengeScreen extends StatelessWidget {
                               Text(
                                 challenge['title'],
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 22,
                                   fontWeight: FontWeight.bold,
                                   color: colorScheme.primary,
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              
-                              // Challenge dates
+                              const SizedBox(height: 10),
+                              // Challenge dates and participants
                               Row(
                                 children: [
-                                  Icon(Icons.calendar_today, size: 16, color: colorScheme.primary.withOpacity(0.7)),
-                                  const SizedBox(width: 4),
+                                  Icon(Icons.calendar_today, size: 18, color: colorScheme.primary.withOpacity(0.7)),
+                                  const SizedBox(width: 6),
                                   Text(
                                     '${challenge['startDate']} - ${challenge['endDate']}',
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 15,
                                       color: colorScheme.primary.withOpacity(0.7),
                                     ),
                                   ),
+
                                 ],
                               ),
-                              const SizedBox(height: 4),
-                              
-                              // Participants count
+                              const SizedBox(height: 10),
+
                               Row(
                                 children: [
-                                  Icon(Icons.people, size: 16, color: colorScheme.primary.withOpacity(0.7)),
-                                  const SizedBox(width: 4),
+                                  Icon(Icons.people, size: 18, color: colorScheme.primary.withOpacity(0.7)),
+                                  const SizedBox(width: 6),
                                   Text(
                                     '${challenge['participants']} participants',
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 15,
                                       color: colorScheme.primary.withOpacity(0.7),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 16),
-                              
+                              const SizedBox(height: 14),
                               // Challenge description
                               Text(
                                 challenge['description'],
@@ -187,66 +207,52 @@ class WeeklyChallengeScreen extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              
                               // Prize
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                                 decoration: BoxDecoration(
-                                  color: colorScheme.primary.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: colorScheme.primary.withOpacity(0.13),
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.emoji_events, size: 16, color: colorScheme.primary),
-                                    const SizedBox(width: 4),
+                                    Icon(Icons.emoji_events, color: colorScheme.primary, size: 22),
+                                    const SizedBox(width: 7),
                                     Text(
                                       'Prize: ${challenge['prize']}',
                                       style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
                                         color: colorScheme.primary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              
+                              const SizedBox(height: 18),
                               // Guidelines
-                              Text(
-                                'Guidelines:',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.primary,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
+                              Text('Guidelines:', style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
+                              const SizedBox(height: 6),
                               ...List.generate(
-                                challenge['guidelines'].length,
-                                (index) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 8),
+                                (challenge['guidelines'] as List).length,
+                                (i) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Icon(Icons.check_circle_outline, size: 16, color: colorScheme.primary),
-                                      const SizedBox(width: 8),
+                                      Text('• ', style: TextStyle(color: colorScheme.primary)),
                                       Expanded(
                                         child: Text(
-                                          challenge['guidelines'][index],
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: colorScheme.primary,
-                                          ),
+                                          challenge['guidelines'][i],
+                                          style: TextStyle(color: colorScheme.primary.withOpacity(0.85)),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              
+                              const SizedBox(height: 18),
                               // Participate button
                               SizedBox(
                                 width: double.infinity,
@@ -258,15 +264,13 @@ class WeeklyChallengeScreen extends StatelessWidget {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: colorScheme.primary,
                                     foregroundColor: colorScheme.background,
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
+                                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
-                                  child: const Text(
-                                    'Participate in Challenge',
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  ),
+                                  child: const Text('Participate in Challenge'),
                                 ),
                               ),
                             ],

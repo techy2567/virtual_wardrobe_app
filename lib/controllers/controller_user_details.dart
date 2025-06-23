@@ -9,6 +9,7 @@ class ControllerUserDetails extends GetxController {
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
   RxString selectedGender = ''.obs;
+  final List<String> genderOptions = ['Male', 'Female', 'Others'];
   // Observable user data
   var userName = ''.obs;
   var userEmail = ''.obs;

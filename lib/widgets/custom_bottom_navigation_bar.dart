@@ -28,7 +28,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
             colorScheme: colorScheme,
           ),
            _buildNavItem(
-            icon: Icons.auto_awesome, // Sparkle icon
+            icon: Icons.favorite_border, // Favorite icon
             index: 1,
             colorScheme: colorScheme,
           ),

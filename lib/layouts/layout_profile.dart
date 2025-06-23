@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:virtual_wardrobe_app/controllers/controller_user_details.dart';
+import '../screens/privacy_screen.dart';
+import '../screens/terms_policies_screen.dart';
+import '../screens/help_support_screen.dart';
+import '../screens/auth/signin_screen.dart';
+import 'package:virtual_wardrobe_app/controllers/auth_controller.dart';
+import '../screens/update_profile_screen.dart';
+import '../screens/about_screen.dart';
 
 class LayoutProfile extends StatelessWidget {
   const LayoutProfile({super.key});
@@ -10,112 +17,174 @@ class LayoutProfile extends StatelessWidget {
     ControllerUserDetails controllerUserDetails = Get.put(
         ControllerUserDetails());
     controllerUserDetails.fetchUserData();
-    final colorScheme = Theme
-        .of(context)
-        .colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Profile'),
         backgroundColor: colorScheme.primaryContainer,
+        elevation: 1,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            // Profile Photo with Edit Icon
-            Center(
-              child: Stack(
-                children: [
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.lightBlueAccent,
-                    backgroundImage: NetworkImage(
-                      'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png',
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Profile Photo with Edit Icon
+              Center(
+                child: Stack(
+                  children: [
+                    const CircleAvatar(
+                      radius: 54,
+                      backgroundColor: Colors.lightBlueAccent,
+                      backgroundImage: NetworkImage(
+                        'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png',
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 4,
-                    child: Container(
-                      decoration: BoxDecoration(
+                    Positioned(
+                      bottom: 0,
+                      right: 4,
+                      child: Material(
                         color: colorScheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(6.0),
-                        child: Icon(Icons.edit, color: Colors.white, size: 18),
+                        shape: const CircleBorder(),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: () {
+                            // TODO: Handle profile photo update
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.all(7.0),
+                            child: Icon(Icons.edit, color: Colors.white, size: 20),
+                          ),
+                        ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              // Name, Gender, Phone
+              Center(
+                child: Column(
+                  children: [
+                    Obx(() => Text(
+                          controllerUserDetails.userName.value,
+                          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        )),
+                    const SizedBox(height: 4),
+                    Obx(() => Text(
+                          controllerUserDetails.userGender.value,
+                          style: textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
+                        )),
+                    const SizedBox(height: 4),
+                    Text(
+                      '+92 123 4567890',
+                      style: textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Edit Profile Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Get.to(() => const UpdateProfileScreen());
+                  },
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Edit Profile'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Name Field
-            Obx(() {
-              return TextFormField(
-                // initialValue: '${controllerUserDetails.userName.value}',
-                readOnly: true, // Make it read-only
-                controller: TextEditingController(
-                    text: controllerUserDetails.userName.value),
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person),
                 ),
-              );
-            }),
-            const SizedBox(height: 16),
-
-            // Gender Field
-            Obx(() {
-              return TextFormField(
-                readOnly: true, // Make it read-only
-                controller: TextEditingController(
-                    text: controllerUserDetails.userGender.value),
-                decoration: const InputDecoration(
-                  labelText: 'Gender',
-
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.transgender),
-                ),
-              );
-            }),
-            const SizedBox(height: 16),
-
-            // Phone Number Field
-            TextFormField(
-              initialValue: '+92 123 4567890',
-              keyboardType: TextInputType.phone,
-              readOnly: true, // Make it read-only
-              decoration: const InputDecoration(
-                labelText: 'Phone Number',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.phone),
               ),
-            ),
-            const SizedBox(height: 24),
 
-            // Edit Profile Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  // TODO: Handle profile update logic
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Profile updated!')),
-                  );
+              const SizedBox(height: 24),
+              // Options Section
+              Text('Account', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              // ListTile(
+              //   leading: const Icon(Icons.settings),
+              //   title: const Text('Settings'),
+              //   onTap: () {
+              //     // TODO: Navigate to settings
+              //   },
+              //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              // ),
+              ListTile(
+                leading: const Icon(Icons.privacy_tip),
+                title: const Text('Privacy'),
+                onTap: () {
+                  Get.to(() => const PrivacyScreen());
                 },
-                icon: const Icon(Icons.save),
-                label: const Text('Edit Profile'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               ),
-            ),
-          ],
+              ListTile(
+                leading: const Icon(Icons.policy),
+                title: const Text('Terms & Policies'),
+                onTap: () {
+                  Get.to(() => const TermsPoliciesScreen());
+                },
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              ),
+              ListTile(
+                leading: const Icon(Icons.help_outline),
+                title: const Text('Help & Support'),
+                onTap: () {
+                  Get.to(() => const HelpSupportScreen());
+                },
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              ),
+              ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: const Text('About'),
+                onTap: () {
+                  Get.to(() => const AboutScreen());
+                },
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              ),
+
+              // const SizedBox(height: 8),
+              // Logout
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.redAccent),
+                title: const Text('Logout', style: TextStyle(color: Colors.redAccent)),
+                onTap: () async {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Confirm Logout'),
+                      content: const Text('Are you sure you want to logout?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('Cancel'),
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Text('Logout'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed == true) {
+                    final AuthController authController = Get.find<AuthController>();
+                    await authController.logout();
+                    Get.offAll(() => const SignInScreen());
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Logged out successfully.')),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

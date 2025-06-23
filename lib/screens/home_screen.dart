@@ -7,9 +7,11 @@ import 'package:virtual_wardrobe_app/layouts/weather_card.dart';
 import 'package:virtual_wardrobe_app/layouts/section_title.dart';
 import 'package:virtual_wardrobe_app/layouts/outfit_card.dart';
 import 'package:virtual_wardrobe_app/layouts/item_card.dart';
+import 'package:virtual_wardrobe_app/screens/create_outfit_screen.dart';
 import 'package:virtual_wardrobe_app/widgets/custom_bottom_navigation_bar.dart';
 import 'package:virtual_wardrobe_app/screens/myoutfits_screen.dart';
 import 'package:virtual_wardrobe_app/screens/outfit_details_screen.dart';
+import '../layouts/favorite_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -74,7 +76,7 @@ class HomeScreen extends StatelessWidget {
     ControllerHome controllerHome = Get.put(ControllerHome());
     List screens = [
       LayoutHome(),
-      LayoutHome(),
+      FavoriteScreen(),
       LayoutProfile(),
     ];
     return Obx(() {

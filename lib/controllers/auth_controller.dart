@@ -276,4 +276,39 @@ class AuthController extends GetxController {
       return null;
     }
   }
+
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      final user = _auth.currentUser;
+      if (user == null || user.email == null) {
+        errorMessage.value = 'No logged-in user.';
+        return;
+      }
+      // Re-authenticate
+      final cred = EmailAuthProvider.credential(email: user.email!, password: oldPassword);
+      await user.reauthenticateWithCredential(cred);
+      // Update password
+      await user.updatePassword(newPassword);
+      Get.snackbar('Success', 'Password changed successfully.');
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'wrong-password') {
+        errorMessage.value = 'Old password is incorrect.';
+      } else if (e.code == 'weak-password') {
+        errorMessage.value = 'The new password is too weak.';
+      } else {
+        errorMessage.value = e.message ?? 'Failed to change password.';
+      }
+      Get.snackbar('Error', errorMessage.value!);
+    } catch (e) {
+      errorMessage.value = 'Failed to change password.';
+      Get.snackbar('Error', errorMessage.value!);
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }
