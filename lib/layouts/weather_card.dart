@@ -54,6 +54,10 @@ class WeatherCard extends StatelessWidget {
         );
       }
       if (controller.error.value.isNotEmpty) {
+        String displayError = controller.error.value;
+        if (!controller.locationPermissionDenied.value) {
+          displayError = 'Unable to fetch weather. Please try again later.';
+        }
         return Card(
           elevation: 2.0,
           shape: RoundedRectangleBorder(
@@ -68,7 +72,7 @@ class WeatherCard extends StatelessWidget {
                   Icon(Icons.location_off, color: colorScheme.primary, size: 40),
                   const SizedBox(height: 8),
                   Text(
-                    controller.error.value,
+                    displayError,
                     style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
                     textAlign: TextAlign.center,
                   ),

@@ -15,6 +15,8 @@ import '../screens/weekly_challenge_screen.dart';
 import '../widgets/outfit_card.dart';
 import '../widgets/section_title.dart';
 import '../controllers/controller_weather.dart';
+import '../screens/all_outfits_screen.dart';
+import '../providers/favorite_provider.dart';
 
 class LayoutHome extends StatefulWidget {
   LayoutHome({super.key});
@@ -31,7 +33,16 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
   // Favorite state
   final Set<String> _favoriteTitles = {};
   late Future<List<OutfitModel>> _myOutfitsFuture;
+  List<OutfitModel>? _cachedOutfits;
   late WeatherController weatherController;
+  String _selectedFilter = 'All';
+  String _selectedRecommendedFilter = 'All';
+  final List<String> _filters = [
+    'All', 'Men', 'Women', 'Other', 'Summer', 'Winter', 'Spring', 'Autumn'
+  ];
+  final List<String> _recommendedFilters = [
+    'Recommended', 'My Outfits'
+  ];
 
   @override
   void initState() {
@@ -77,6 +88,7 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
   Future<void> _refreshOutfits() async {
     setState(() {
       _myOutfitsFuture = fetchMyOutfits();
+      _cachedOutfits = null;
     });
     await weatherController.getCurrentLocationAndFetchWeather();
   }
@@ -95,6 +107,7 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final favoriteIdsStream = FavoriteProvider().favoriteIdsStream;
     return Scaffold(
       floatingActionButton: FloatingActionButton(onPressed: (){
         Get.to(CreateOutfitScreen());
@@ -102,7 +115,7 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
 
       appBar: AppBar(
         title: Text(
-          'Outfits Calendar',
+          'Virtual Wardrobe',
           style: TextStyle(
             color: colorScheme.primary,
             fontWeight: FontWeight.bold,
@@ -112,13 +125,13 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
         ),
         backgroundColor: colorScheme.background,
         elevation: 1,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.calendar_month, color: colorScheme.primary, size: 28),
-            onPressed: () {},
-            tooltip: 'Calendar',
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.calendar_month, color: colorScheme.primary, size: 28),
+        //     onPressed: () {},
+        //     tooltip: 'Calendar',
+        //   ),
+        // ],
       ),
       backgroundColor: colorScheme.surface,
       body: LayoutBuilder(
@@ -172,8 +185,8 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
                                           colors: [
-                                            colorScheme.primary.withOpacity(0.25),
-                                            colorScheme.primary.withOpacity(0.45),
+                                            colorScheme.primary.withOpacity(0.70),
+                                            colorScheme.primary,
                                           ],
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
@@ -247,12 +260,61 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
                             ),
                           ),
                           const SizedBox(height: 28.0),
+                          // Filter Chips
+
                           // My Outfits Section Title
-                          SectionTitle(
-                            key: Key('myOutfitsTitle'),
-                            title: 'My Outfits',
-                            onAddPressed: () => Get.to(CreateOutfitScreen()),
-                            onViewAllPressed: null,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SectionTitle(
+                                key: Key('myOutfitsTitle'),
+                                title: 'My Outfits',
+                                onAddPressed: null,
+                                onViewAllPressed: null,
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Get.to(() => AllOutfitsScreen(
+                                    title: 'My Outfits',
+                                    showRecommended: false,
+                                  ));
+                                },
+                                child: Row(
+                                  children: [
+                                    Text('See All', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    // Icon(Icons.arrow_forward_ios, size: 16),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Filter Chips for My Outfits
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: _filters.map((filter) {
+                                final selected = _selectedFilter == filter;
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 8.0),
+                                  child: ChoiceChip(
+                                    label: Text(filter),
+                                    selected: selected,
+                                    onSelected: (val) {
+                                      setState(() {
+                                        _selectedFilter = filter;
+                                      });
+                                    },
+                                    selectedColor: colorScheme.primary,
+                                    backgroundColor: colorScheme.surface,
+                                    labelStyle: TextStyle(
+                                      color: selected ? colorScheme.background : colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    checkmarkColor: selected ? colorScheme.background : colorScheme.primary,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
                           ),
                           const SizedBox(height: 18.0),
                           FutureBuilder<List<OutfitModel>>(
@@ -262,13 +324,13 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
                                 return Skeletonizer(
                                   enabled: true,
                                   child: SizedBox(
-                                    height: 290,
+                                    height: 310,
                                     child: ListView.separated(
                                       scrollDirection: Axis.horizontal,
                                       itemCount: 3,
                                       separatorBuilder: (_, __) => SizedBox(width: 16),
                                       itemBuilder: (context, index) => SizedBox(
-                                        // width: 180,
+                                        width: 180,
                                         child: OutfitCard(
                                           outfit: OutfitModel(
                                             id: '',
@@ -294,158 +356,191 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
                                 return Center(child: Text('Failed to load outfits.'));
                               }
                               final outfits = snapshot.data ?? [];
-                              if (outfits.isEmpty) {
-                                return Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.access_time_filled_outlined, size: 48, color: colorScheme.primary.withOpacity(0.5)),
-                                      SizedBox(height: 12),
-                                      Text(
-                                        'No outfits found',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          color: colorScheme.primary.withOpacity(0.7),
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        'Tap + to add your first outfit!',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: colorScheme.primary.withOpacity(0.5),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
+                              // My Outfits filtering
+                              List<OutfitModel> filteredOutfits = outfits;
+                              if (_selectedFilter != 'All') {
+                                if (_selectedFilter == 'Men' || _selectedFilter == 'Women' || _selectedFilter == 'Other') {
+                                  filteredOutfits = outfits.where((o) => (o.genderType ?? '').toLowerCase() == _selectedFilter.toLowerCase()).toList();
+                                } else {
+                                  filteredOutfits = outfits.where((o) => (o.season).toLowerCase() == _selectedFilter.toLowerCase()).toList();
+                                }
                               }
-                              return SizedBox(
-                                height: 290,
-                                child: ListView.separated(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: outfits.length,
-                                  separatorBuilder: (_, __) => SizedBox(width: 16),
-                                  itemBuilder: (context, index) {
-                                    final outfit = outfits[index];
-                                    return FutureBuilder<File?>(
-                                      future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
-                                      builder: (context, imgSnapshot) {
-                                        final imageFile = imgSnapshot.data;
-                                        return SizedBox(
-                                          // width: 180,
-                                          child: OutfitCard(
-                                            outfit: outfit.copyWith(imageId: imageFile?.path ?? ''),
-                                            onTap: () => Get.to(() => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: imageFile?.path ?? ''))),
+                              // Recommended Outfits filtering
+                              List<OutfitModel> recommended = getRecommendedOutfits(outfits);
+                              List<OutfitModel> filteredRecommended = recommended;
+                              if (_selectedRecommendedFilter != 'All') {
+                                if (_selectedRecommendedFilter == 'Men' || _selectedRecommendedFilter == 'Women' || _selectedRecommendedFilter == 'Other') {
+                                  filteredRecommended = recommended.where((o) => (o.genderType ?? '').toLowerCase() == _selectedRecommendedFilter.toLowerCase()).toList();
+                                } else {
+                                  filteredRecommended = recommended.where((o) => (o.season).toLowerCase() == _selectedRecommendedFilter.toLowerCase()).toList();
+                                }
+                              }
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // My Outfits List
+                                  if (filteredOutfits.isEmpty)
+                                    Center(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.access_time_filled_outlined, size: 48, color: colorScheme.primary.withOpacity(0.5)),
+                                          SizedBox(height: 12),
+                                          Text(
+                                            'No outfits found',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              color: colorScheme.primary.withOpacity(0.7),
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 28.0),
-                          // Recommended Outfits Section Title
-                          SectionTitle(
-                            key: Key('recommendedOutfitsTitle'),
-                            title: 'Recommended Outfits',
-                            onAddPressed: null,
-                            onViewAllPressed: null,
-                          ),
-                          const SizedBox(height: 18.0),
-                          FutureBuilder<List<OutfitModel>>(
-                            future: _myOutfitsFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return Skeletonizer(
-                                  enabled: true,
-                                  child: SizedBox(
-                                    height: 290,
-                                    child: ListView.separated(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: 3,
-                                      separatorBuilder: (_, __) => SizedBox(width: 16),
-                                      itemBuilder: (context, index) => SizedBox(
-                                        // width: 180,
-                                        child: OutfitCard(
-                                          outfit: OutfitModel(
-                                            id: '',
-                                            userId: '',
-                                            title: '',
-                                            description: '',
-                                            imageId: '',
-                                            categories: [''],
-                                            clothingType: '',
-                                            weatherRange: '',
-                                            season: '',
-                                            isFavorite: false,
-                                            isDonated: false,
-                                            createdAt: DateTime.now(),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            'Tap + to add your first outfit!',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: colorScheme.primary.withOpacity(0.5),
+                                            ),
                                           ),
-                                        ),
+                                        ],
+                                      ),
+                                    )
+                                  else
+                                    SizedBox(
+                                      height: 310,
+                                      child: ListView.separated(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: filteredOutfits.length,
+                                        separatorBuilder: (_, __) => SizedBox(width: 16),
+                                        itemBuilder: (context, index) {
+                                          final outfit = filteredOutfits[index];
+                                          return FutureBuilder<File?>(
+                                            future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
+                                            builder: (context, imgSnapshot) {
+                                              final imageFile = imgSnapshot.data;
+                                              return SizedBox(
+                                                width: 180,
+                                                child: OutfitCard(
+                                                  outfit: outfit.copyWith(imageId: imageFile?.path ?? ''),
+                                                  onTap: () => Get.to(() => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: imageFile?.path ?? ''))),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
                                       ),
                                     ),
-                                  ),
-                                );
-                              }
-                              if (snapshot.hasError) {
-                                return Center(child: Text('Failed to load recommended outfits.'));
-                              }
-                              final outfits = getRecommendedOutfits(snapshot.data ?? []);
-                              if (outfits.isEmpty) {
-                                return Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                  const SizedBox(height: 28.0),
+                                  // Recommended Outfits Section Title
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Icon(Icons.recommend, size: 48, color: colorScheme.primary.withOpacity(0.5)),
-                                      SizedBox(height: 12),
-                                      Text(
-                                        'No recommended outfits',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          color: colorScheme.primary.withOpacity(0.7),
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                      SectionTitle(
+                                        key: Key('recommendedOutfitsTitle'),
+                                        title: 'Recommended Outfits',
+                                        onAddPressed: null,
+                                        onViewAllPressed: null,
                                       ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        'Try adding more outfits for better recommendations.',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: colorScheme.primary.withOpacity(0.5),
+                                      TextButton(
+                                        onPressed: () {
+                                          Get.to(() => AllOutfitsScreen(
+                                            title: 'Recommended Outfits',
+                                            showRecommended: true,
+                                          ));
+                                        },
+                                        child: Row(
+                                          children: [
+                                            Text('See All ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                            // Icon(Icons.arrow_forward_ios, size: 12),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                );
-                              }
-                              return SizedBox(
-                                height: 290,
-                                child: ListView.separated(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: outfits.length,
-                                  separatorBuilder: (_, __) => SizedBox(width: 16),
-                                  itemBuilder: (context, index) {
-                                    final outfit = outfits[index];
-                                    return FutureBuilder<File?>(
-                                      future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
-                                      builder: (context, imgSnapshot) {
-                                        final imageFile = imgSnapshot.data;
-                                        return SizedBox(
-                                          // width: 180,
-                                          child: OutfitCard(
-                                            outfit: outfit.copyWith(imageId: imageFile?.path ?? ''),
-                                            onTap: () => Get.to(() => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: imageFile?.path ?? ''))),
+                                  const SizedBox(height: 8.0),
+                                  // Filter Chips for Recommended Outfits
+                                  SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: _filters.map((filter) {
+                                        final selected = _selectedRecommendedFilter == filter;
+                                        return Padding(
+                                          padding: const EdgeInsets.only(right: 8.0),
+                                          child: ChoiceChip(
+                                            label: Text(filter),
+                                            selected: selected,
+                                            onSelected: (val) {
+                                              setState(() {
+                                                _selectedRecommendedFilter = filter;
+                                              });
+                                            },
+                                            selectedColor: colorScheme.primary,
+                                            backgroundColor: colorScheme.surface,
+                                            labelStyle: TextStyle(
+                                              color: selected ? colorScheme.background : colorScheme.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            checkmarkColor: selected ? colorScheme.background : colorScheme.primary,
                                           ),
                                         );
-                                      },
-                                    );
-                                  },
-                                ),
+                                      }).toList(),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 18.0),
+                                  // Recommended Outfits List
+                                  if (filteredRecommended.isEmpty)
+                                    Center(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.recommend, size: 48, color: colorScheme.primary.withOpacity(0.5)),
+                                          SizedBox(height: 12),
+                                          Text(
+                                            'No recommended outfits',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              color: colorScheme.primary.withOpacity(0.7),
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            'Try adding more outfits for better recommendations.',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: colorScheme.primary.withOpacity(0.5),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  else
+                                    SizedBox(
+                                      height: 310,
+                                      child: ListView.separated(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: filteredRecommended.length,
+                                        separatorBuilder: (_, __) => SizedBox(width: 16),
+                                        itemBuilder: (context, index) {
+                                          final outfit = filteredRecommended[index];
+                                          return FutureBuilder<File?>(
+                                            future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
+                                            builder: (context, imgSnapshot) {
+                                              final imageFile = imgSnapshot.data;
+                                              return SizedBox(
+                                                width: 180,
+                                                child: OutfitCard(
+                                                  outfit: outfit.copyWith(imageId: imageFile?.path ?? ''),
+                                                  onTap: () => Get.to(() => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: imageFile?.path ?? ''))),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                ],
                               );
                             },
                           ),

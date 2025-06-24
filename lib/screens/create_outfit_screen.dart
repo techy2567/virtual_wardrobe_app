@@ -20,6 +20,7 @@ class CreateOutfitScreen extends StatefulWidget {
 class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
   late final ControllerCreateOutfit controller;
   late final TextEditingController searchController;
+  bool showMoreClothingTypes = false;
 
   @override
   void initState() {
@@ -48,6 +49,7 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      resizeToAvoidBottomInset: false,
       floatingActionButton: Obx(() => SizedBox(
           width: Get.width,
           child: ElevatedButton(
@@ -203,6 +205,36 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
                 maxLines: 2,
                 onChanged: (value) => controller.description.value = value,
               ),
+              SizedBox(height: 16.0),
+              // Gender/Type Selector
+              SectionTitle(title: 'Type (Men, Women, Other)'),
+              SizedBox(height: 8.0),
+              Obx(() => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ChoiceChip(
+                    label: Text('Men'),
+                    selected: controller.selectedGenderType.value == 'Men',
+                    onSelected: (selected) {
+                      if (selected) controller.selectGenderType('Men');
+                    },
+                  ),
+                  ChoiceChip(
+                    label: Text('Women'),
+                    selected: controller.selectedGenderType.value == 'Women',
+                    onSelected: (selected) {
+                      if (selected) controller.selectGenderType('Women');
+                    },
+                  ),
+                  ChoiceChip(
+                    label: Text('Other'),
+                    selected: controller.selectedGenderType.value == 'Other',
+                    onSelected: (selected) {
+                      if (selected) controller.selectGenderType('Other');
+                    },
+                  ),
+                ],
+              )),
               SizedBox(height: 24.0),
               // Select Season Section
               SectionTitle(title: 'Select Season'),
@@ -345,6 +377,8 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
                 SizedBox(height: 16.0),
               Obx(() {
                 final filtered = controller.filteredClothingTypes;
+                final showAll = showMoreClothingTypes || controller.clothingTypeSearch.value.isNotEmpty;
+                final displayList = showAll ? filtered : filtered.take(7).toList();
                 return filtered.isEmpty
                     ? Text('No clothing types found.')
                     : GridView.builder(
@@ -356,9 +390,53 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
                           mainAxisSpacing: 16.0,
                           childAspectRatio: 3.0,
                         ),
-                        itemCount: filtered.length,
+                        itemCount: showAll
+                            ? displayList.length + 1 // +1 for the minus button
+                            : (filtered.length > 7 ? 8 : displayList.length),
                         itemBuilder: (context, index) {
-                          final type = filtered[index];
+                          if (!showAll && index == 7) {
+                            // Show more button as an ElevatedButton with a + icon
+                            return ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  showMoreClothingTypes = true;
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colorScheme.surface,
+                                foregroundColor: colorScheme.primary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  side: BorderSide(color: colorScheme.primary.withOpacity(0.5)),
+                                ),
+                                elevation: 0,
+                                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                              ),
+                              child: Icon(Icons.add, color: colorScheme.primary),
+                            );
+                          }
+                          if (showAll && index == displayList.length) {
+                            // Show less button as an ElevatedButton with a - icon
+                            return ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  showMoreClothingTypes = false;
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colorScheme.surface,
+                                foregroundColor: colorScheme.primary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  side: BorderSide(color: colorScheme.primary.withOpacity(0.5)),
+                                ),
+                                elevation: 0,
+                                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                              ),
+                              child: Icon(Icons.remove, color: colorScheme.primary),
+                            );
+                          }
+                          final type = displayList[index];
                           final isSelected = controller.selectedClothingType.value == type;
                           return ElevatedButton(
                             onPressed: () {
@@ -380,7 +458,7 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
                       );
               }),
 
-              SizedBox(height: 24.0),
+              SizedBox(height: 50.0),
               // Donated Switch
               // Row(
               //   mainAxisAlignment: MainAxisAlignment.spaceBetween,

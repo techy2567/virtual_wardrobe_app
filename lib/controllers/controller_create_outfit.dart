@@ -17,6 +17,7 @@ class ControllerCreateOutfit extends GetxController {
   RxString selectedCategory = ''.obs;
   RxString selectedClothingType = ''.obs;
   RxString selectedSeason = ''.obs;
+  RxString selectedGenderType = ''.obs;
 
   // New fields for OutfitModel
   RxString title = ''.obs;
@@ -41,12 +42,12 @@ class ControllerCreateOutfit extends GetxController {
     { 'imageUrl': 'https://via.placeholder.com/100/D3D3D3', 'title': 'Camel Shirt' },
   ].obs;
   RxList<Map<String, dynamic>> weatherOptions = <Map<String, dynamic>>[
-    {'range': '-30° to -20°', 'condition': 'Extra cold'},
-    {'range': '-20° to -10°', 'condition': 'Very cold'},
-    {'range': '-10° to 0°', 'condition': 'Cold'},
-    {'range': '0° to +10°', 'condition': 'Chilly'},
-    {'range': '+10° to +20°', 'condition': 'Warm'},
-    {'range': '+20° to +30°', 'condition': 'Hot'},
+    {'range': '-10°C to 0°C', 'condition': 'Very Cold'},
+    {'range': '0°C to 10°C', 'condition': 'Cold'},
+    {'range': '10°C to 20°C', 'condition': 'Chilly'},
+    {'range': '20°C to 30°C', 'condition': 'Warm'},
+    {'range': '30°C to 40°C', 'condition': 'Hot'},
+    {'range': '40°C to 50°C', 'condition': 'Very Hot'},
   ].obs;
   RxList<String> categoryOptions = <String>['Classic', 'Sport', 'Casual', 'Festive', 'Home', 'Outside'].obs;
   RxList<String> seasonOptions = <String>['Winter', 'Summer', 'Spring', 'Autumn'].obs;
@@ -67,6 +68,7 @@ class ControllerCreateOutfit extends GetxController {
   void selectCategory(String value) => selectedCategory.value = value;
   void selectClothingType(String value) => selectedClothingType.value = value;
   void selectSeason(String value) => selectedSeason.value = value;
+  void selectGenderType(String value) => selectedGenderType.value = value;
   void toggleDonated(bool value) => isDonated.value = value;
 
   void updateClothingTypeSearch(String query) {
@@ -137,6 +139,11 @@ class ControllerCreateOutfit extends GetxController {
         isLoading.value = false;
         return false;
       }
+      if (selectedGenderType.value.isEmpty) {
+        Get.snackbar('Validation', 'Please select a type (Men, Women, Other).');
+        isLoading.value = false;
+        return false;
+      }
 
       // Check internet connection
       // (You can use connectivity_plus here if available)
@@ -181,6 +188,7 @@ class ControllerCreateOutfit extends GetxController {
         isFavorite: false,
         isDonated: isDonated.value,
         createdAt: DateTime.now(),
+        genderType: selectedGenderType.value,
       );
 
       // Save to Firestore

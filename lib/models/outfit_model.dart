@@ -13,6 +13,7 @@ class OutfitModel {
   final bool isFavorite;
   final bool isDonated;
   final DateTime createdAt;
+  final String? genderType; // men, women, other, or null
 
   OutfitModel({
     required this.id,
@@ -27,6 +28,7 @@ class OutfitModel {
     this.isFavorite = false,
     this.isDonated = false,
     required this.createdAt,
+    this.genderType,
   });
 
   factory OutfitModel.fromJson(Map<String, dynamic> json, {String? documentId}) {
@@ -45,6 +47,7 @@ class OutfitModel {
       createdAt: (json['createdAt'] is Timestamp)
           ? (json['createdAt'] as Timestamp).toDate()
           : DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      genderType: json['genderType'] as String?,
     );
   }
 
@@ -61,6 +64,7 @@ class OutfitModel {
       'isFavorite': isFavorite,
       'isDonated': isDonated,
       'createdAt': Timestamp.fromDate(createdAt),
+      if (genderType != null) 'genderType': genderType,
     };
   }
 
@@ -77,6 +81,7 @@ class OutfitModel {
     bool? isFavorite,
     bool? isDonated,
     DateTime? createdAt,
+    String? genderType,
   }) {
     return OutfitModel(
       id: id ?? this.id,
@@ -91,6 +96,7 @@ class OutfitModel {
       isFavorite: isFavorite ?? this.isFavorite,
       isDonated: isDonated ?? this.isDonated,
       createdAt: createdAt ?? this.createdAt,
+      genderType: genderType ?? this.genderType,
     );
   }
 } 

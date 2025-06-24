@@ -5,10 +5,28 @@ import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:virtual_wardrobe_app/screens/donation_screen.dart';
 import 'package:virtual_wardrobe_app/screens/tailor_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../providers/favorite_provider.dart';
 
 class OutfitDetailsScreen extends StatelessWidget {
   final OutfitModel? outfit;
   const OutfitDetailsScreen({Key? key, this.outfit}) : super(key: key);
+
+  Future<void> _toggleFavorite(BuildContext context, bool isFavorite) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || outfit == null) return;
+    final favRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('favourite')
+        .doc(outfit!.id);
+    if (isFavorite) {
+      await favRef.delete();
+    } else {
+      await favRef.set(outfit!.toJson());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,12 +57,24 @@ class OutfitDetailsScreen extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.edit_outlined, color: colorScheme.primary),
-            onPressed: () {
-              // TODO: Implement edit outfit logic
+          StreamBuilder<Set<String>>(
+            stream: FavoriteProvider().favoriteIdsStream,
+            builder: (context, favSnapshot) {
+              final favoriteIds = favSnapshot.data ?? <String>{};
+              final isFavorite = outfit != null && favoriteIds.contains(outfit!.id);
+              return IconButton(
+                icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border, color: isFavorite ? Colors.redAccent : colorScheme.primary),
+                onPressed: () => _toggleFavorite(context, isFavorite),
+                tooltip: isFavorite ? 'Remove from favorites' : 'Add to favorites',
+              ).marginOnly(right: 10);
             },
           ),
+          // IconButton(
+          //   icon: Icon(Icons.edit_outlined, color: colorScheme.primary),
+          //   onPressed: () {
+          //     // TODO: Implement edit outfit logic
+          //   },
+          // ),
         ],
       ),
       backgroundColor: colorScheme.background,
