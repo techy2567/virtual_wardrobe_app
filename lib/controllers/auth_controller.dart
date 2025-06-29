@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_model.dart';
+import 'package:virtual_wardrobe_app/screens/home_screen.dart';
+import 'package:virtual_wardrobe_app/screens/auth/password_reset_screen.dart';
+import 'package:virtual_wardrobe_app/screens/auth/signin_screen.dart';
 
 class AuthController extends GetxController {
   static AuthController get instance => Get.find();
@@ -38,15 +41,15 @@ class AuthController extends GetxController {
   // Updated handler for auth changes: check email verification & navigate accordingly
   void _handleAuthChanged(User? user) async {
     if (user == null) {
-      Get.offAllNamed('/login');
+      Get.offAll(() => SignInScreen());
     } else {
       // Reload user to get latest verification status
       // await user.reload();
       final currentUser = _auth.currentUser;
       if (currentUser != null && !currentUser.emailVerified) {
-        Get.offAllNamed('/verify-email');
+        Get.offAll(() => PasswordResetScreen());
       } else {
-        // Get.offAllNamed('/home');
+        // Get.offAll(() => HomeScreen());
       }
       _firebaseUser.value = currentUser;
     }
@@ -151,7 +154,7 @@ class AuthController extends GetxController {
       _firebaseUser.value = cred.user;
 
       // Navigate to verify email screen
-      Get.offAllNamed('/verify-email');
+      Get.offAll(() => PasswordResetScreen());
     } on FirebaseAuthException catch (e) {
       errorMessage(e.message ?? 'Registration failed');
       rethrow;
@@ -185,10 +188,10 @@ class AuthController extends GetxController {
       // Check email verification after login
       final currentUser = cred.user;
       if (currentUser != null && !currentUser.emailVerified) {
-        Get.offAllNamed('/verify-email');
+        Get.offAll(() => PasswordResetScreen());
       } else {
         _firebaseUser.value = currentUser;
-        Get.offAllNamed('/home');
+        Get.offAll(() => HomeScreen());
       }
     } on FirebaseAuthException catch (e) {
       errorMessage(e.message ?? 'Login failed');

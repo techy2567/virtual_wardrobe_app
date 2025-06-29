@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:virtual_wardrobe_app/controllers/auth_controller.dart';
+import 'package:virtual_wardrobe_app/screens/auth/signin_screen.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -50,7 +51,15 @@ class SignUpScreen extends StatelessWidget {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
                     ),
                     filled: true,
                     fillColor: colorScheme.surface,
@@ -68,7 +77,15 @@ class SignUpScreen extends StatelessWidget {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
                     ),
                     filled: true,
                     fillColor: colorScheme.surface,
@@ -87,7 +104,15 @@ class SignUpScreen extends StatelessWidget {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
                     ),
                     filled: true,
                     fillColor: colorScheme.surface,
@@ -105,7 +130,15 @@ class SignUpScreen extends StatelessWidget {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
                     ),
                     filled: true,
                     fillColor: colorScheme.surface,
@@ -169,6 +202,17 @@ class SignUpScreen extends StatelessWidget {
                             ),
                           )
                           : const Text('Sign Up'),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Already have an account? ", style: TextStyle(color: colorScheme.primary.withOpacity(0.7))),
+                    TextButton(
+                      onPressed: () => Get.to(() => const SignInScreen()),
+                      child: Text('Sign In', style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
                 ),
               ],
             ),

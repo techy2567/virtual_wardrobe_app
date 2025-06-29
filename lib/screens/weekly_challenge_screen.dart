@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'create_outfit_screen.dart';
+
 class WeeklyChallengeScreen extends StatelessWidget {
   const WeeklyChallengeScreen({super.key});
 
@@ -259,11 +261,11 @@ class WeeklyChallengeScreen extends StatelessWidget {
                                 child: ElevatedButton(
                                   onPressed: () {
                                     // TODO: Navigate to create outfit screen with challenge parameters
-                                    Get.toNamed('/create-outfit', arguments: {'challenge': challenge});
+                                    Get.to(() => CreateOutfitScreen());
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: colorScheme.primary,
-                                    foregroundColor: colorScheme.background,
+                                     foregroundColor: colorScheme.background,
                                     padding: const EdgeInsets.symmetric(vertical: 14),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),

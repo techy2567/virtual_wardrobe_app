@@ -121,13 +121,16 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
                           if (pickedFile != null) {
                             final file = File(pickedFile.path);
                             final bytes = await file.length();
-                            final isPng = pickedFile.path.toLowerCase().endsWith('.png');
+                            final lowerPath = pickedFile.path.toLowerCase();
+                            final isPng = lowerPath.endsWith('.png');
+                            final isJpg = lowerPath.endsWith('.jpg');
+                            final isJpeg = lowerPath.endsWith('.jpeg');
                             if (bytes > 1024 * 1024) {
                               Get.snackbar('Image too large', 'Please select an image smaller than 1MB.');
                               return;
                             }
-                            if (!isPng) {
-                              Get.snackbar('Invalid format', 'Please select a PNG image for best results.');
+                            if (!(isPng || isJpg || isJpeg)) {
+                              Get.snackbar('Invalid format', 'Please select a PNG, JPG, or JPEG image. PNG is recommended for background removal.');
                               return;
                             }
                             controller.setOutfitImage(file);
@@ -169,7 +172,7 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
               ),
                 SizedBox(height: 8.0),
                 Text(
-                'Image requirements: Max size 1MB, PNG format recommended for background removal',
+                'Image requirements: Max size 1MB, PNG, JPG, or JPEG format (PNG recommended for background removal)',
                 style: TextStyle(fontSize: 12),
                 textAlign: TextAlign.center,
               ),

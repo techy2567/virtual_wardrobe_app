@@ -8,6 +8,8 @@ import 'package:virtual_wardrobe_app/screens/tailor_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../providers/favorite_provider.dart';
+import 'package:virtual_wardrobe_app/controllers/controller_create_outfit.dart';
+import 'package:virtual_wardrobe_app/screens/home_screen.dart';
 
 class OutfitDetailsScreen extends StatelessWidget {
   final OutfitModel? outfit;
@@ -69,6 +71,45 @@ class OutfitDetailsScreen extends StatelessWidget {
               ).marginOnly(right: 10);
             },
           ),
+          if (outfit != null)
+            IconButton(
+              icon: Icon(Icons.delete_outline, color: Colors.redAccent),
+              tooltip: 'Delete Outfit',
+              onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Delete Outfit'),
+                    content: Text('Are you sure you want to delete this outfit? This action cannot be undone.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: Text('Delete', style: TextStyle(color: Colors.red)),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true) {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user != null) {
+                    final success = await ControllerCreateOutfit.deleteOutfit(
+                      outfitId: outfit!.id,
+                      userId: user.uid,
+                      imageId: outfit!.imageId,
+                    );
+                    if (success) {
+                      Get.snackbar('Deleted', 'Outfit deleted successfully.');
+                      // Go to HomeScreen and trigger reload
+                      Get.offAll(() => HomeScreen(), arguments: {'reload': true});
+                    }
+                  }
+                }
+              },
+            ),
           // IconButton(
           //   icon: Icon(Icons.edit_outlined, color: colorScheme.primary),
           //   onPressed: () {

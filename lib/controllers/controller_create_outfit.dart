@@ -220,4 +220,35 @@ class ControllerCreateOutfit extends GetxController {
       return false;
     }
   }
+
+  static Future<bool> deleteOutfit({required String outfitId, required String userId, required String? imageId}) async {
+    try {
+      // Delete from Firestore (outfits)
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('outfits')
+          .doc(outfitId)
+          .delete();
+      // Remove from favorites
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('favourite')
+          .doc(outfitId)
+          .delete();
+      // Delete local image file
+      if (imageId != null && imageId.isNotEmpty) {
+        final dir = await getApplicationDocumentsDirectory();
+        final file = File('${dir.path}/$imageId');
+        if (await file.exists()) {
+          await file.delete();
+        }
+      }
+      return true;
+    } catch (e) {
+      Get.snackbar('Delete Error', 'Failed to delete outfit.');
+      return false;
+    }
+  }
 }

@@ -60,6 +60,17 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = Get.arguments;
+    if (args != null && args is Map && args['reload'] == true) {
+      _refreshOutfits();
+      // Optionally clear the argument to avoid repeated reloads
+      // Get.arguments = null;
+    }
+  }
+
+  @override
   void dispose() {
     _weatherAnim.dispose();
     _challengeAnim.dispose();

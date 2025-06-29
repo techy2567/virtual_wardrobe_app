@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:virtual_wardrobe_app/controllers/auth_controller.dart';
 import 'package:virtual_wardrobe_app/screens/auth/forgot_password_screen.dart';
+import 'package:virtual_wardrobe_app/screens/auth/signup_screen.dart';
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
@@ -43,7 +44,15 @@ class SignInScreen extends StatelessWidget {
                   prefixIcon: Icon(Icons.email_outlined, color: colorScheme.primary.withOpacity(0.6)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide.none,
+                    borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: colorScheme.primary, width: 2),
                   ),
                   filled: true,
                   fillColor: colorScheme.surface,
@@ -60,7 +69,15 @@ class SignInScreen extends StatelessWidget {
                   prefixIcon: Icon(Icons.lock_outline, color: colorScheme.primary.withOpacity(0.6)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide.none,
+                    borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: colorScheme.primary, width: 2),
                   ),
                   filled: true,
                   fillColor: colorScheme.surface,
@@ -121,6 +138,17 @@ class SignInScreen extends StatelessWidget {
                   'Forgot Password?',
                   style: TextStyle(color: colorScheme.primary.withOpacity(0.8)),
                 ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Don't have an account? ", style: TextStyle(color: colorScheme.primary.withOpacity(0.7))),
+                  TextButton(
+                    onPressed: () => Get.to(() => const SignUpScreen()),
+                    child: Text('Sign Up', style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold)),
+                  ),
+                ],
               ),
             ],
           ),

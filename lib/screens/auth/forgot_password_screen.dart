@@ -55,7 +55,15 @@ class ForgotPasswordScreen extends StatelessWidget {
                   prefixIcon: Icon(Icons.email_outlined, color: colorScheme.primary.withOpacity(0.6)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide.none,
+                    borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: colorScheme.primary, width: 2),
                   ),
                   filled: true,
                   fillColor: colorScheme.surface,

@@ -2,9 +2,84 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:virtual_wardrobe_app/controllers/controller_user_details.dart';
 import 'package:virtual_wardrobe_app/controllers/auth_controller.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
-class UpdateProfileScreen extends StatelessWidget {
+class UpdateProfileScreen extends StatefulWidget {
   const UpdateProfileScreen({Key? key}) : super(key: key);
+
+  @override
+  State<UpdateProfileScreen> createState() => _UpdateProfileScreenState();
+}
+
+class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
+  File? _localProfileImage;
+  bool _loadingImage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocalProfileImage();
+  }
+
+  Future<void> _loadLocalProfileImage() async {
+    final controllerUserDetails = Get.find<ControllerUserDetails>();
+    final photoUrl = controllerUserDetails.photoUrl.value;
+    if (photoUrl.isNotEmpty && !photoUrl.startsWith('http')) {
+      final dir = await getApplicationDocumentsDirectory();
+      final file = File('${dir.path}/$photoUrl');
+      if (await file.exists()) {
+        setState(() {
+          _localProfileImage = file;
+        });
+      }
+    }
+  }
+
+  Future<String?> _saveImageLocally(File imageFile) async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final ext = imageFile.path.split('.').last;
+      final imageId = 'profile_$timestamp.$ext';
+      final localPath = '${dir.path}/$imageId';
+      final savedFile = await imageFile.copy(localPath);
+      if (await savedFile.exists()) {
+        return imageId;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      Get.snackbar('Image Save Error', 'Failed to save image locally.');
+      return null;
+    }
+  }
+
+  Future<void> _pickProfileImage() async {
+    setState(() { _loadingImage = true; });
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      // Optionally: check file size/type here
+      final imageId = await _saveImageLocally(file);
+      if (imageId != null) {
+        final controllerUserDetails = Get.find<ControllerUserDetails>();
+        await controllerUserDetails.updateProfile(
+          name: controllerUserDetails.userName.value,
+          gender: controllerUserDetails.userGender.value,
+          phone: controllerUserDetails.userPhone.value,
+          photoUrlUpdate: imageId,
+        );
+        setState(() {
+          _localProfileImage = File('${(file.parent.parent).path}/$imageId');
+        });
+        Get.snackbar('Success', 'Profile photo updated!');
+      }
+    }
+    setState(() { _loadingImage = false; });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,27 +101,44 @@ class UpdateProfileScreen extends StatelessWidget {
               Center(
                 child: Stack(
                   children: [
-                    const CircleAvatar(
-                      radius: 54,
-                      backgroundColor: Colors.lightBlueAccent,
-                      backgroundImage: NetworkImage(
-                        'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png',
-                      ),
-                    ),
+                    Obx(() {
+                      final controllerUserDetails = Get.find<ControllerUserDetails>();
+                      Widget avatar;
+                      if (_localProfileImage != null) {
+                        avatar = CircleAvatar(
+                          radius: 54,
+                          backgroundColor: Colors.lightBlueAccent,
+                          backgroundImage: FileImage(_localProfileImage!),
+                        );
+                      } else if (controllerUserDetails.photoUrl.value.isNotEmpty) {
+                        avatar = CircleAvatar(
+                          radius: 54,
+                          backgroundColor: Colors.lightBlueAccent,
+                          backgroundImage: NetworkImage(controllerUserDetails.photoUrl.value),
+                        );
+                      } else {
+                        avatar = const CircleAvatar(
+                          radius: 54,
+                          backgroundColor: Colors.lightBlueAccent,
+                          backgroundImage: NetworkImage('https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'),
+                        );
+                      }
+                      return avatar;
+                    }),
                     Positioned(
                       bottom: 0,
                       right: 4,
                       child: Material(
-                        color: colorScheme.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         shape: const CircleBorder(),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(20),
-                          onTap: () {
-                            // TODO: Handle profile photo update
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.all(7.0),
-                            child: Icon(Icons.edit, color: Colors.white, size: 20),
+                          onTap: _loadingImage ? null : _pickProfileImage,
+                          child: Padding(
+                            padding: const EdgeInsets.all(7.0),
+                            child: _loadingImage
+                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                : const Icon(Icons.edit, color: Colors.white, size: 20),
                           ),
                         ),
                       ),
