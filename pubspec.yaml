@@ -48,19 +48,57 @@ dependencies:
   path_provider: ^2.1.5
   permission_handler: ^11.3.1
   connectivity_plus: ^5.0.2
+  flutter_launcher_icons: any
+  flutter_native_splash: ^2.4.6
+  flutter_svg: ^2.2.0
+
 
 #  change_app_package_name: ^1.5.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: any
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  #  background_color: "#0080ff"
+  image_path: "assets/images/logo.png"
+  adaptive_icon_background: "assets/images/back.png"
+  adaptive_icon_foreground: "assets/images/logo.png"
+  min_sdk_android: 21
+  #  remove_alpha_ios: true
+
+  # flutter pub get
+  # flutter pub run flutter_launcher_icons
+  # color: "#42a5f5"
+  # dart run flutter_native_splash:create
+
+  flutter_native_splash: ^2.4.6
+flutter_native_splash:
+  # Center image (appears in the middle)
+  image: assets/images/splash.png
+  # Background image (fills the splash screen background)
+  background_image: assets/images/back.png
+  #  color: "#2A3EFF"
+  # (Optional) Set the splash screen for different devices
+  android: true
+  ios: true
+  web: false
+  # Dark mode settings (Optional)
+  android_gravity: center
+  ios_content_mode: center
+  # Dark theme splash screen (if needed)
+  android_12:
+    image: assets/images/splash.png
+    background_image: assets/images/back.png
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  #  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -76,6 +114,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/outfits/
+    - assets/images/
     - assets/images/items/
 
   #   - images/a_dot_ham.jpeg

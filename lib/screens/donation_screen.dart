@@ -1,15 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../controllers/controller_create_outfit.dart';
 
-class DonationScreen extends StatelessWidget {
-  const DonationScreen({super.key});
+class DonationScreen extends StatefulWidget {
+  final String outfitId;
+  const DonationScreen({super.key, required this.outfitId});
+
+  @override
+  State<DonationScreen> createState() => _DonationScreenState();
+}
+
+class _DonationScreenState extends State<DonationScreen> {
+  bool _donating = false;
+  String? _donatedTo;
 
   // Function to launch URLs
   Future<void> _launchUrl(String url) async {
     final Uri uri = Uri.parse(url);
     if (!await launchUrl(uri)) {
       throw Exception('Could not launch $url');
+    }
+  }
+
+  Future<void> _handleDonate(String orgName) async {
+    setState(() { _donating = true; });
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      Get.snackbar('Error', 'User not logged in.');
+      setState(() { _donating = false; });
+      return;
+    }
+    final success = await ControllerCreateOutfit.markOutfitAsDonated(
+      outfitId: widget.outfitId,
+      userId: user.uid,
+    );
+    setState(() {
+      _donating = false;
+      if (success) _donatedTo = orgName;
+    });
+    if (success) {
+      Get.snackbar('Success', 'Marked as donated to $orgName!');
     }
   }
 
@@ -78,13 +110,29 @@ class DonationScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Click on the icons to contact these organizations directly',
+                'Click on the icons to contact these organizations directly or donate your outfit',
                 style: TextStyle(
                   fontSize: 14,
                   color: colorScheme.primary.withOpacity(0.7),
                 ),
               ),
               const SizedBox(height: 24),
+              if (_donatedTo != null)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle, color: colorScheme.primary),
+                      SizedBox(width: 8),
+                      Expanded(child: Text('Outfit marked as donated to $_donatedTo!')),
+                    ],
+                  ),
+                ),
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -159,6 +207,25 @@ class DonationScreen extends StatelessWidget {
                                           ),
                                         ),
                                       ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    ElevatedButton.icon(
+                                      onPressed: _donating || _donatedTo != null
+                                          ? null
+                                          : () => _handleDonate(org['name']),
+                                      icon: _donating
+                                          ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                                          : Icon(Icons.volunteer_activism),
+                                      label: Text(_donatedTo == org['name'] ? 'Donated' : 'Donate to this organization'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: colorScheme.primary,
+                                        foregroundColor: colorScheme.background,
+                                        minimumSize: const Size(double.infinity, 40.0),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10.0),
+                                        ),
+                                        elevation: 1.0,
+                                      ),
                                     ),
                                   ],
                                 ),

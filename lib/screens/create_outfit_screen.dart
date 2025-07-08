@@ -106,7 +106,7 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
       backgroundColor: colorScheme.background,
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: EdgeInsets.only(left: 16.0,right: 16,top: 16.0,bottom: MediaQuery.viewInsetsOf(context).bottom+16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[

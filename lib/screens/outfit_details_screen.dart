@@ -10,6 +10,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../providers/favorite_provider.dart';
 import 'package:virtual_wardrobe_app/controllers/controller_create_outfit.dart';
 import 'package:virtual_wardrobe_app/screens/home_screen.dart';
+import 'package:virtual_wardrobe_app/screens/virtual_tryon_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class OutfitDetailsScreen extends StatelessWidget {
   final OutfitModel? outfit;
@@ -117,10 +119,10 @@ class OutfitDetailsScreen extends StatelessWidget {
           //   },
           // ),
         ],
-      ),
+      ),                                                                                
       backgroundColor: colorScheme.background,
       body: Stack(
-        alignment: Alignment.topCenter,
+        alignment: Alignment.topCenter, 
 
         children: [
           // Fullscreen Image with Hero animation
@@ -218,9 +220,12 @@ class OutfitDetailsScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: () => Get.to(() => const DonationScreen()),
-                            icon: Icon(Icons.volunteer_activism),
-                            label: Text('Donate Clothes'),
+                            onPressed: (outfit == null || (outfit?.isDonated ?? false)) ? null : () async {
+                              await Get.to(() => DonationScreen(outfitId: outfit!.id));
+                              // Optionally, trigger a UI refresh here if needed
+                            },
+                            icon: Icon((outfit?.isDonated ?? false) ? Icons.check : Icons.volunteer_activism),
+                            label: Text((outfit?.isDonated ?? false) ? 'Donated' : 'Donate Clothes'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: colorScheme.primary,
                               foregroundColor: colorScheme.background,
@@ -238,6 +243,32 @@ class OutfitDetailsScreen extends StatelessWidget {
                             onPressed: () => Get.to(() => const TailorScreen()),
                             icon: Icon(Icons.content_cut),
                             label: Text('Find a Tailor'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colorScheme.primary,
+                              foregroundColor: colorScheme.background,
+                              minimumSize: const Size(double.infinity, 48.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              elevation: 2.0,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: outfit == null ? null : () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => VirtualTryOnScreen(
+                                    outfitImagePath: outfit!.imageId,
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: Icon(Icons.camera_front),
+                            label: Text('Virtual Try-On'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: colorScheme.primary,
                               foregroundColor: colorScheme.background,

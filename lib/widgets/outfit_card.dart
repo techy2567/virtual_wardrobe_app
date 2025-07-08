@@ -29,6 +29,7 @@ class _OutfitCardState extends State<OutfitCard> {
   Future<void> _checkFavorite() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+    if (widget.outfit.id.isEmpty) return; // Defensive check
     final favRef = FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
@@ -46,6 +47,7 @@ class _OutfitCardState extends State<OutfitCard> {
     });
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+    if (widget.outfit.id.isEmpty) return; // Defensive check
     final favRef = FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
@@ -228,6 +230,25 @@ class _OutfitCardState extends State<OutfitCard> {
                           ),
                   ),
                 ),
+                if (widget.outfit.isDonated)
+                  Positioned(
+                    top: 10,
+                    left: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.85),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.check, color: Colors.white, size: 16),
+                          SizedBox(width: 4),
+                          Text('Donated', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
             Padding(

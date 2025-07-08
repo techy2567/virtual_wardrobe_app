@@ -145,7 +145,7 @@ class MyOutfitsScreen extends StatelessWidget {
                       return OutfitCard(
                         onTap: () {
                           // TODO: Navigate to outfit details
-                        }, outfit: OutfitModel.fromJson(outfit)
+                        }, outfit: OutfitModel.fromJson(outfit, documentId: outfit['id'] ?? 'dummy_id')
                       );
                     },
                   ),

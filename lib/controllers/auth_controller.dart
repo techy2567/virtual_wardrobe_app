@@ -51,7 +51,7 @@ class AuthController extends GetxController {
       } else {
         // Get.offAll(() => HomeScreen());
       }
-      _firebaseUser.value = currentUser;
+      // _firebaseUser.value = currentUser; // Removed to prevent recursion
     }
   }
 

@@ -251,4 +251,19 @@ class ControllerCreateOutfit extends GetxController {
       return false;
     }
   }
+
+  static Future<bool> markOutfitAsDonated({required String outfitId, required String userId}) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('outfits')
+          .doc(outfitId)
+          .update({'isDonated': true});
+      return true;
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to mark outfit as donated.');
+      return false;
+    }
+  }
 }
