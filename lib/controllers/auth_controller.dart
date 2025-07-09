@@ -43,15 +43,17 @@ class AuthController extends GetxController {
     if (user == null) {
       Get.offAll(() => SignInScreen());
     } else {
-      // Reload user to get latest verification status
-      // await user.reload();
       final currentUser = _auth.currentUser;
+      try {
+        await currentUser?.reload(); // Safely reload user
+      } catch (e) {
+        print('User reload failed: $e');
+      }
       if (currentUser != null && !currentUser.emailVerified) {
         Get.offAll(() => PasswordResetScreen());
       } else {
-        // Get.offAll(() => HomeScreen());
+        Get.offAll(() => HomeScreen()); // Always go to HomeScreen if verified
       }
-      // _firebaseUser.value = currentUser; // Removed to prevent recursion
     }
   }
 
@@ -151,10 +153,8 @@ class AuthController extends GetxController {
           .doc(cred.user?.uid)
           .set(userModel.toMap());
 
-      _firebaseUser.value = cred.user;
-
-      // Navigate to verify email screen
-      Get.offAll(() => PasswordResetScreen());
+      _firebaseUser.value = cred.user; // Only update state
+      // Navigation is handled by _handleAuthChanged
     } on FirebaseAuthException catch (e) {
       errorMessage(e.message ?? 'Registration failed');
       rethrow;
@@ -185,14 +185,8 @@ class AuthController extends GetxController {
         password: password,
       );
 
-      // Check email verification after login
-      final currentUser = cred.user;
-      if (currentUser != null && !currentUser.emailVerified) {
-        Get.offAll(() => PasswordResetScreen());
-      } else {
-        _firebaseUser.value = currentUser;
-        Get.offAll(() => HomeScreen());
-      }
+      _firebaseUser.value = cred.user; // Only update state
+      // Navigation is handled by _handleAuthChanged
     } on FirebaseAuthException catch (e) {
       errorMessage(e.message ?? 'Login failed');
       rethrow;

@@ -215,7 +215,7 @@ class OutfitDetailsScreen extends StatelessWidget {
                         _InfoChip(label: 'Created', value: created),
                       ],
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
@@ -254,33 +254,31 @@ class OutfitDetailsScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: outfit == null ? null : () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => VirtualTryOnScreen(
-                                    outfitImagePath: outfit!.imageId,
-                                  ),
-                                ),
-                              );
-                            },
-                            icon: Icon(Icons.camera_front),
-                            label: Text('Virtual Try-On'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: colorScheme.primary,
-                              foregroundColor: colorScheme.background,
-                              minimumSize: const Size(double.infinity, 48.0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              elevation: 2.0,
+                      ],
+                    ),
+                    SizedBox(height: 16,),
+                    ElevatedButton.icon(
+                      onPressed: outfit == null ? null : () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => VirtualTryOnScreen(
+                              outfitImagePath: outfit!.imageId,
                             ),
                           ),
+                        );
+                      },
+                      icon: Icon(Icons.camera_front),
+                      label: Text('Virtual Try-On'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.background,
+                        minimumSize: const Size(double.infinity, 48.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
                         ),
-                      ],
+                        elevation: 2.0,
+                      ),
                     ),
                   ],
                 ),
