@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:virtual_wardrobe_app/screens/auth/signin_screen.dart';
 
 import '../../controllers/auth_controller.dart';
 
@@ -109,7 +110,7 @@ class PasswordResetScreen extends StatelessWidget {
                 TextButton(
                   onPressed: () {
                     controller.clearForgetAuthState();
-                    Get.back();
+                    Get.off(SignInScreen());
                   },
                   child: Text(
                     'Back to Login',

@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:virtual_wardrobe_app/controllers/controller_user_details.dart';
 import '../screens/privacy_screen.dart';
 import '../screens/terms_policies_screen.dart';
@@ -9,16 +12,49 @@ import 'package:virtual_wardrobe_app/controllers/auth_controller.dart';
 import '../screens/update_profile_screen.dart';
 import '../screens/about_screen.dart';
 
-class LayoutProfile extends StatelessWidget {
-  const LayoutProfile({super.key});
+class LayoutProfile extends StatefulWidget {
+   LayoutProfile({super.key});
+
+  @override
+  State<LayoutProfile> createState() => _LayoutProfileState();
+}
+
+class _LayoutProfileState extends State<LayoutProfile> {
+  File? _localProfileImage;
+
+  bool _loadingImage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocalProfileImage();
+  }
+
+  Future<void> _loadLocalProfileImage() async {
+    final controllerUserDetails = Get.find<ControllerUserDetails>();
+    final photoUrl = controllerUserDetails.photoUrl.value;
+    if (photoUrl.isNotEmpty && !photoUrl.startsWith('http')) {
+      final dir = await getApplicationDocumentsDirectory();
+      final file = File('${dir.path}/$photoUrl');
+      if (await file.exists()) {
+        setState(() {
+          _localProfileImage = file;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     ControllerUserDetails controllerUserDetails = Get.put(
         ControllerUserDetails());
     controllerUserDetails.fetchUserData();
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme
+        .of(context)
+        .colorScheme;
+    final textTheme = Theme
+        .of(context)
+        .textTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -34,55 +70,65 @@ class LayoutProfile extends StatelessWidget {
             children: [
               // Profile Photo with Edit Icon
               Center(
-                child: Stack(
-                  children: [
-                    const CircleAvatar(
+                child:  Obx(() {
+                  final controllerUserDetails = Get.find<ControllerUserDetails>();
+                  Widget avatar;
+                  if (_localProfileImage != null) {
+                    avatar = CircleAvatar(
                       radius: 54,
                       backgroundColor: Colors.lightBlueAccent,
-                      backgroundImage: NetworkImage(
-                        'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png',
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 4,
-                      child: Material(
-                        color: colorScheme.primary,
-                        shape: const CircleBorder(),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(20),
-                          onTap: () {
-                            // TODO: Handle profile photo update
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.all(7.0),
-                            child: Icon(Icons.edit, color: Colors.white, size: 20),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                      backgroundImage: FileImage(_localProfileImage!),
+                    );
+                  } else if (controllerUserDetails.photoUrl.value.isNotEmpty) {
+                    avatar = CircleAvatar(
+                      radius: 54,
+                      backgroundColor: Colors.lightBlueAccent,
+                      backgroundImage: NetworkImage(controllerUserDetails.photoUrl.value),
+                    );
+                  } else {
+                    avatar = const CircleAvatar(
+                      radius: 54,
+                      backgroundColor: Colors.lightBlueAccent,
+                      backgroundImage: NetworkImage('https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'),
+                    );
+                  }
+                  return avatar;
+                }),
               ),
               const SizedBox(height: 18),
-              // Name, Gender, Phone
+              // Name, Gender, Phone, Email
               Center(
                 child: Column(
                   children: [
-                    Obx(() => Text(
+                    Obx(() =>
+                        Text(
                           controllerUserDetails.userName.value,
-                          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                          style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold),
                         )),
+                    const SizedBox(height: 4),
+                    Obx(() =>
+                        Text(
+                          controllerUserDetails.userGender.value,
+                          style: textTheme.bodyMedium?.copyWith(color: Colors
+                              .grey[700]),
+                        )),
+                    // const SizedBox(height: 4),
+                    // Obx(() => Text(
+                    //   controllerUserDetails.userPhone.value.isNotEmpty
+                    //       ? controllerUserDetails.userPhone.value
+                    //       : '-',
+                    //   style: textTheme.bodyMedium?.copyWith(
+                    //       color: Colors.grey[700]),
+                    // )),
                     const SizedBox(height: 4),
                     Obx(() => Text(
-                          controllerUserDetails.userGender.value,
-                          style: textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
-                        )),
-                    const SizedBox(height: 4),
-                    Text(
-                      '+92 123 4567890',
-                      style: textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
-                    ),
+                      controllerUserDetails.userEmail.value.isNotEmpty
+                          ? controllerUserDetails.userEmail.value
+                          : '-',
+                      style: textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[700]),
+                    )),
                   ],
                 ),
               ),
@@ -104,7 +150,8 @@ class LayoutProfile extends StatelessWidget {
 
               const SizedBox(height: 24),
               // Options Section
-              Text('Account', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              Text('Account', style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               // ListTile(
               //   leading: const Icon(Icons.settings),
@@ -151,30 +198,34 @@ class LayoutProfile extends StatelessWidget {
               // Logout
               ListTile(
                 leading: const Icon(Icons.logout, color: Colors.redAccent),
-                title: const Text('Logout', style: TextStyle(color: Colors.redAccent)),
+                title: const Text(
+                    'Logout', style: TextStyle(color: Colors.redAccent)),
                 onTap: () async {
                   final confirmed = await showDialog<bool>(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Confirm Logout'),
-                      content: const Text('Are you sure you want to logout?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('Cancel'),
+                    builder: (context) =>
+                        AlertDialog(
+                          title: const Text('Confirm Logout'),
+                          content: const Text(
+                              'Are you sure you want to logout?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text('Cancel'),
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.redAccent,
+                              ),
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text('Logout'),
+                            ),
+                          ],
                         ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
-                          ),
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text('Logout'),
-                        ),
-                      ],
-                    ),
                   );
                   if (confirmed == true) {
-                    final AuthController authController = Get.find<AuthController>();
+                    final AuthController authController = Get.find<
+                        AuthController>();
                     await authController.logout();
                     Get.offAll(() => const SignInScreen());
                     ScaffoldMessenger.of(context).showSnackBar(
