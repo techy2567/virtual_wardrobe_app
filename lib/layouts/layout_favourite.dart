@@ -169,18 +169,12 @@ class LayoutFavourite extends StatelessWidget {
                   future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
                   builder: (context, imgSnapshot) {
                     final imageFile = imgSnapshot.data;
-                    String displayImageId = '';
-                    if (imageFile != null) {
-                      displayImageId = imageFile.path;
-                    } else if (outfit.imageId.startsWith('http')) {
-                      displayImageId = outfit.imageId;
-                    } else {
-                      displayImageId = '';
-                    }
+                    // Only use local file path if it exists, otherwise use empty string
+                    String displayImageId = imageFile != null ? imageFile.path : '';
                     return GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => OutfitDetailsScreen(outfit: outfit,)),
+                          MaterialPageRoute(builder: (_) => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: displayImageId))),
                         );
                       },
                       child: OutfitCard(

@@ -68,6 +68,18 @@ class _AllOutfitsScreenState extends State<AllOutfitsScreen> with SingleTickerPr
     }
   }
 
+  Stream<List<OutfitModel>> outfitsStream() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return const Stream.empty();
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('outfits')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => OutfitModel.fromJson(doc.data(), documentId: doc.id)).toList());
+  }
+
   @override
   void dispose() {
     _animController.dispose();
@@ -84,8 +96,8 @@ class _AllOutfitsScreenState extends State<AllOutfitsScreen> with SingleTickerPr
         backgroundColor: colorScheme.primaryContainer,
       ),
       backgroundColor: colorScheme.surface,
-      body: FutureBuilder<List<OutfitModel>>(
-        future: _outfitsFuture,
+      body: StreamBuilder<List<OutfitModel>>(
+        stream: outfitsStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Skeletonizer(

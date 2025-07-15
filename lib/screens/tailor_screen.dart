@@ -295,12 +295,7 @@ class TailorScreen extends StatelessWidget {
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () {
-                                // TODO: Implement booking functionality
-                                Get.snackbar(
-                                  'Booking',
-                                  'Booking functionality coming soon!',
-                                  snackPosition: SnackPosition.BOTTOM,
-                                );
+                               _launchUrl('https://wa.me/${'+923084316822'.replaceAll('+', '')}'); // WhatsApp link
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: colorScheme.primary,
@@ -311,7 +306,7 @@ class TailorScreen extends StatelessWidget {
                                 ),
                               ),
                               child: const Text(
-                                'Book Appointment',
+                                'WhatsApp to Book',
                                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                             ),

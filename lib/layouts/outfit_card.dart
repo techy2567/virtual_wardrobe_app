@@ -30,7 +30,8 @@ class _OutfitCardState extends State<OutfitCard> {
           width: width,
           height: height,
         );
-      } else if (imageId.startsWith('http')) {
+      }
+      else if (imageId.startsWith('http')) {
         // Firebase Storage URL, add cache busting param
         final cacheBustedUrl = imageId + '?v= [1m{DateTime.now().millisecondsSinceEpoch}';
         return Image.network(
