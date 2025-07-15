@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../models/outfit_model.dart';
-import '../widgets/outfit_card.dart';
+import '../layouts/outfit_card.dart';
 import 'outfit_details_screen.dart';
 import '../controllers/controller_create_outfit.dart';
 import '../providers/favorite_provider.dart';
@@ -250,6 +250,7 @@ class _AllOutfitsScreenState extends State<AllOutfitsScreen> with SingleTickerPr
                       separatorBuilder: (_, __) => const SizedBox(height: 16),
                       itemBuilder: (context, index) {
                         final outfit = filtered[index];
+                        final isFavorite = favoriteIds.contains(outfit.id);
                         return FutureBuilder<File?>(
                           future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
                           builder: (context, imgSnapshot) {
@@ -260,6 +261,21 @@ class _AllOutfitsScreenState extends State<AllOutfitsScreen> with SingleTickerPr
                               child: OutfitCard(
                                 outfit: displayOutfit,
                                 horizontal: true,
+                                isFavorite: isFavorite,
+                                onFavorite: () async {
+                                  final user = FirebaseAuth.instance.currentUser;
+                                  if (user == null) return;
+                                  final favRef = FirebaseFirestore.instance
+                                      .collection('users')
+                                      .doc(user.uid)
+                                      .collection('favourite')
+                                      .doc(outfit.id);
+                                  if (isFavorite) {
+                                    await favRef.delete();
+                                  } else {
+                                    await favRef.set(outfit.toJson());
+                                  }
+                                },
                                 onTap: () => Get.to(() => OutfitDetailsScreen(outfit: displayOutfit)),
                               ),
                             );

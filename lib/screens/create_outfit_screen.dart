@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:virtual_wardrobe_app/screens/home_screen.dart';
-import 'package:virtual_wardrobe_app/widgets/section_title.dart'; // Assuming SectionTitle is in widgets
-import 'package:virtual_wardrobe_app/widgets/item_card.dart'; // Import ItemCard
+import 'package:virtual_wardrobe_app/layouts/section_title.dart'; // Assuming SectionTitle is in widgets
+import 'package:virtual_wardrobe_app/layouts/item_card.dart'; // Import ItemCard
 import 'package:virtual_wardrobe_app/controllers/controller_create_outfit.dart';
 import 'package:path_provider/path_provider.dart';
 import '../layouts/layout_home.dart';

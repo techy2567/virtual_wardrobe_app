@@ -257,29 +257,50 @@ class OutfitDetailsScreen extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 16,),
-                    ElevatedButton.icon(
-                      onPressed: outfit == null ? null : () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => VirtualTryOnScreen(
-                              outfitImagePath: outfit!.imageId,
-                            ),
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.camera_front),
-                      label: Text('Virtual Try-On'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.background,
-                        minimumSize: const Size(double.infinity, 48.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        elevation: 2.0,
-                      ),
-                    ),
+                    // ElevatedButton.icon(
+                    //   onPressed: (outfit == null || outfit!.imageId.isEmpty) ? null : () async {
+                    //     final imageId = outfit!.imageId;
+                    //     if (imageId.startsWith('http')) {
+                    //       // It's a Firebase Storage download URL
+                    //       Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //           builder: (_) => VirtualTryOnScreen(
+                    //             outfitImagePath: imageId,
+                    //           ),
+                    //         ),
+                    //       );
+                    //     } else {
+                    //       // Try as local file
+                    //       final file = await ControllerCreateOutfit.getImageFileByIdStatic(imageId);
+                    //       if (file != null && await file.exists()) {
+                    //         Navigator.push(
+                    //           context,
+                    //           MaterialPageRoute(
+                    //             builder: (_) => VirtualTryOnScreen(
+                    //               outfitImagePath: file.path,
+                    //             ),
+                    //           ),
+                    //         );
+                    //       } else {
+                    //         ScaffoldMessenger.of(context).showSnackBar(
+                    //           SnackBar(content: Text('Outfit image file or URL not found.')),
+                    //         );
+                    //       }
+                    //     }
+                    //   },
+                    //   icon: Icon(Icons.camera_front),
+                    //   label: Text('Virtual Try-On'),
+                    //   style: ElevatedButton.styleFrom(
+                    //     backgroundColor: colorScheme.primary,
+                    //     foregroundColor: colorScheme.background,
+                    //     minimumSize: const Size(double.infinity, 48.0),
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(12.0),
+                    //     ),
+                    //     elevation: 2.0,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

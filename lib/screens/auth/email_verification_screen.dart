@@ -37,7 +37,7 @@ class EmailVerificationScreen extends StatelessWidget {
                 icon: const Icon(Icons.refresh),
                 label: const Text('I have verified my email'),
                 onPressed: () async {
-                  await authController.reloadUser();
+                  // await authController.reloadUser();
                 },
               ),
               const SizedBox(height: 16),
@@ -45,7 +45,7 @@ class EmailVerificationScreen extends StatelessWidget {
                 icon: const Icon(Icons.send),
                 label: const Text('Resend Verification Email'),
                 onPressed: () async {
-                  await authController.sendEmailVerification();
+                  // await authController.sendEmailVerification();
                 },
               ),
               const SizedBox(height: 32),

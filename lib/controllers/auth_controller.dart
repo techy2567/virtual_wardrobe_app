@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/user_model.dart';
 import 'package:virtual_wardrobe_app/screens/home_screen.dart';
-import 'package:virtual_wardrobe_app/screens/auth/password_reset_screen.dart';
+import 'package:virtual_wardrobe_app/models/user_model.dart';
 import 'package:virtual_wardrobe_app/screens/auth/signin_screen.dart';
 
 class AuthController extends GetxController {
@@ -21,14 +20,14 @@ class AuthController extends GetxController {
   final fullNameController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  var selectedGender = Rx<String?>(null); // Observable for selected gender
+  var selectedGender = 'Male'.obs; // Observable for selected gender
   final List<String> genderOptions = ['Male', 'Female', 'Others'];
   // Getters
   User? get user => _firebaseUser.value;
-  bool get isLoggedIn => _firebaseUser.value != null && _firebaseUser.value!.emailVerified;
+  bool get isLoggedIn => _firebaseUser.value != null; // Remove emailVerified check
 
   void setSelectedGender(String? newValue) {
-    selectedGender.value = newValue;
+    selectedGender.value = newValue??'Male';
   }
 
   @override
@@ -49,11 +48,7 @@ class AuthController extends GetxController {
       } catch (e) {
         print('User reload failed: $e');
       }
-      if (currentUser != null && !currentUser.emailVerified) {
-        Get.offAll(() => PasswordResetScreen());
-      } else {
-        Get.offAll(() => HomeScreen()); // Always go to HomeScreen if verified
-      }
+      Get.offAll(() => HomeScreen()); // Always go to HomeScreen
     }
   }
 
@@ -127,36 +122,64 @@ class AuthController extends GetxController {
     required String email,
     required String password,
     required String name,
+    required String gender,
   }) async {
     try {
       isLoading(true);
       errorMessage(null);
+
+      // Gender must be selected (controller-level check)
+      if (gender == null || gender.isEmpty) {
+        errorMessage.value = 'Please select your gender';
+        Get.snackbar('Error', 'Please select your gender');
+        isLoading(false);
+        return;
+      }
+
+      print('[DEBUG] Starting registration for email: '
+          ' [32m$email [0m, name:  [32m$name [0m');
 
       final UserCredential cred = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // Send email verification after registration
-      await cred.user?.sendEmailVerification();
+      print('[DEBUG] Firebase user created: UID =  [32m [1m [4m [7m${cred.user?.uid} [0m');
+
+      // Ensure uid and gender are never null
+      final uid = cred.user!.uid;
+      final gender1 = selectedGender.value ?? "Not specified";
 
       // Save user data to Firestore
       final userModel = UserModel(
-        id: cred.user?.uid,
+        id: uid,
         email: email,
         name: name,
+        gender: gender1, // <-- Save gender with fallback
         createdAt: DateTime.now(),
       );
 
+      print('[DEBUG] Attempting to write user to Firestore: '
+          'uid= [32m$uid [0m, data= [34m${userModel.toMap()} [0m');
+
       await _firestore
           .collection('users')
-          .doc(cred.user?.uid)
+          .doc(uid)
           .set(userModel.toMap());
 
-      _firebaseUser.value = cred.user; // Only update state
-      // Navigation is handled by _handleAuthChanged
+      print('[DEBUG] User successfully written to Firestore!');
+
+      // Log out the user and navigate to SignInScreen after successful registration
+      await _auth.signOut();
+      _firebaseUser.value = null;
+      Get.offAll(() => SignInScreen());
     } on FirebaseAuthException catch (e) {
+      print('[ERROR] FirebaseAuthException during registration:  [31m${e.code} [0m, message:  [31m${e.message} [0m');
       errorMessage(e.message ?? 'Registration failed');
+      rethrow;
+    } catch (e) {
+      print('[ERROR] Exception during registration:  [31m$e [0m');
+      errorMessage('Registration failed: $e');
       rethrow;
     } finally {
       isLoading(false);
@@ -207,25 +230,6 @@ class AuthController extends GetxController {
 
   RxString successMessage = ''.obs;
 
-  void sendResetLink() async {
-    isLoading.value = true;
-    errorMessage.value = '';
-    successMessage.value = '';
-    try {
-      final email = emailController.text.trim();
-      if (email.isEmpty) {
-        errorMessage.value = 'Please enter your email';
-      } else {
-        await _auth.sendPasswordResetEmail(email: email);
-        successMessage.value = 'Reset link sent to $email';
-      }
-    } catch (e) {
-      errorMessage.value = 'Failed to send reset link. Please try again.';
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
   void clearForgetAuthState() {
     emailController.clear();
     passwordController.clear();
@@ -234,30 +238,6 @@ class AuthController extends GetxController {
     errorMessage.value = '';
     successMessage.value = '';
     isLoading.value = false;
-  }
-
-  // New: Resend Email Verification
-  Future<void> sendEmailVerification() async {
-    try {
-      if (_auth.currentUser != null && !_auth.currentUser!.emailVerified) {
-        await _auth.currentUser!.sendEmailVerification();
-        successMessage.value = 'Verification email sent.';
-      } else {
-        errorMessage.value = 'User is already verified or not logged in.';
-      }
-    } catch (e) {
-      errorMessage.value = 'Failed to send verification email. Please try again.';
-    }
-  }
-
-  // New: Reload user to refresh email verification status
-  Future<void> reloadUser() async {
-    try {
-      await _auth.currentUser?.reload();
-      _firebaseUser.value = _auth.currentUser;
-    } catch (e) {
-      errorMessage.value = 'Failed to reload user data.';
-    }
   }
 
   // ----------------- Helper Methods -----------------

@@ -1,24 +1,25 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:virtual_wardrobe_app/controllers/auth_controller.dart';
 import 'package:virtual_wardrobe_app/firebase_options.dart';
-import 'package:virtual_wardrobe_app/screens/auth/password_reset_screen.dart';
+import 'package:virtual_wardrobe_app/screens/auth/forgot_password_screen.dart';
 import 'package:virtual_wardrobe_app/screens/auth/signin_screen.dart';
 import 'package:virtual_wardrobe_app/screens/auth/signup_screen.dart';
 import 'package:virtual_wardrobe_app/screens/home_screen.dart';
-import 'package:virtual_wardrobe_app/welcome_screen.dart';
+import 'controllers/auth_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
+  await FirebaseAuth.instance.setLanguageCode('en');
+// await FirebaseAuth.instance.signOut();
   // Register AuthController globally
   Get.put(AuthController());
 
-  runApp(const MyApp());
+  runApp( MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/login', page: () => SignInScreen()),
         GetPage(name: '/signup', page: () => SignUpScreen()),
         GetPage(name: '/home', page: () => HomeScreen()),
-        GetPage(name: '/verify-email', page: () => PasswordResetScreen()),
+        GetPage(name: '/forgot-password', page: () => ForgotPasswordScreen()),
         // Add other routes if you have
       ],
       theme: ThemeData(
@@ -52,7 +53,7 @@ class MyApp extends StatelessWidget {
           foregroundColor: lightBeige,
         ),
       ),
-      home: const Root(), // Use root widget to decide start screen
+      home: Root(), // Use root widget to decide start screen
     );
   }
 }
@@ -64,21 +65,19 @@ class Root extends StatelessWidget {
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
 
-    return Obx(() {
-      // While Firebase is loading
-      if (authController.isLoading.value) {
-        return const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        );
-      }
-
-      // If user is logged in, show Home
-      if (authController.isLoggedIn) {
-        return const HomeScreen();
-      }
-
-      // Else show Welcome
-      return const WelcomeScreen();
-    });
+    return FutureBuilder(
+      future: Future.delayed( Duration(milliseconds: 300)),
+      builder: (_, snapshot) {
+        if (authController.isLoading.value || snapshot.connectionState != ConnectionState.done) {
+          return  Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (authController.isLoggedIn) {
+          return  HomeScreen();
+        }
+        return  SignInScreen();
+      },
+    );
   }
 }

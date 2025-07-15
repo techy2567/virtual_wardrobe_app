@@ -50,19 +50,19 @@ class AboutScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.person),
               title: const Text('Developed by'),
-              subtitle: const Text('LayyahDevs'),
+              subtitle: const Text('Awais, Wahab & Nasir'),
             ),
             ListTile(
               leading: const Icon(Icons.email),
               title: const Text('Contact'),
-              subtitle: const Text('support@layyahdevs.com'),
-              onTap: () => _launchUrl('mailto:support@layyahdevs.com'),
+              subtitle: const Text('support@wardrobe.com'),
+              onTap: () => _launchUrl('mailto:support@wardrobe.com'),
             ),
             ListTile(
               leading: const Icon(Icons.phone),
               title: const Text('Phone'),
               subtitle: const Text('+92 300 1234567'),
-              onTap: () => _launchUrl('tel:+923001234567'),
+              onTap: () => _launchUrl('tel:+92300 000 0000'),
             ),
             // ListTile(
             //   leading: const Icon(Icons.whatsapp),
@@ -73,12 +73,12 @@ class AboutScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.language),
               title: const Text('Website'),
-              subtitle: const Text('layyahdevs.com'),
-              onTap: () => _launchUrl('https://layyahdevs.com'),
+              subtitle: const Text('wardrobe.com'),
+              onTap: () => _launchUrl('https://wardrobe.com'),
             ),
             // const Spacer(),
             Text(
-              '© 2024 LayyahDevs. All rights reserved.',
+              '© 2025 wardrobe. All rights reserved.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
             ),
           ],

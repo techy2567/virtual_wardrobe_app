@@ -1,13 +1,17 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../controllers/controller_create_outfit.dart';
 import '../models/outfit_model.dart';
 import '../screens/outfit_details_screen.dart';
-import '../widgets/outfit_card.dart';
+import 'outfit_card.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class FavoriteScreen extends StatelessWidget {
-  const FavoriteScreen({Key? key}) : super(key: key);
+class LayoutFavourite extends StatelessWidget {
+  const LayoutFavourite({Key? key}) : super(key: key);
 
   Stream<List<OutfitModel>> favoriteOutfitsStream() {
     final user = FirebaseAuth.instance.currentUser;
@@ -161,18 +165,33 @@ class FavoriteScreen extends StatelessWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 16),
               itemBuilder: (context, index) {
                 final outfit = outfits[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => OutfitDetailsScreen()),
+                return FutureBuilder<File?>(
+                  future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
+                  builder: (context, imgSnapshot) {
+                    final imageFile = imgSnapshot.data;
+                    String displayImageId = '';
+                    if (imageFile != null) {
+                      displayImageId = imageFile.path;
+                    } else if (outfit.imageId.startsWith('http')) {
+                      displayImageId = outfit.imageId;
+                    } else {
+                      displayImageId = '';
+                    }
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => OutfitDetailsScreen(outfit: outfit,)),
+                        );
+                      },
+                      child: OutfitCard(
+                        onTap: () => Get.to(() => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: displayImageId))),
+                        outfit: outfit.copyWith(imageId: displayImageId),
+                        horizontal: true,
+                        isFavorite: true,
+                        onFavorite: () => toggleFavorite(outfit, true),
+                      ),
                     );
                   },
-                  child: OutfitCard(
-                    outfit: outfit,
-                    horizontal: true,
-                    isFavorite: true,
-                    onFavorite: () => toggleFavorite(outfit, true),
-                  ),
                 );
               },
             ),

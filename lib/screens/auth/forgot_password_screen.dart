@@ -94,7 +94,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 ),
 
               ElevatedButton(
-                onPressed: controller.isLoading.value ? null : controller.sendResetLink,
+                onPressed: controller.isLoading.value ? null : controller.sendPasswordResetEmail,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary,
                   foregroundColor: colorScheme.background,

@@ -42,6 +42,10 @@ class _DonationScreenState extends State<DonationScreen> {
     });
     if (success) {
       Get.snackbar('Success', 'Marked as donated to $orgName!');
+      // Redirect to HomeScreen after successful donation
+      Future.delayed(const Duration(milliseconds: 800), () {
+        Get.offAllNamed('/home');
+      });
     }
   }
 

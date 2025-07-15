@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:virtual_wardrobe_app/layouts/outfit_card.dart';
+import 'package:virtual_wardrobe_app/layouts/section_title.dart';
 import 'package:virtual_wardrobe_app/layouts/weather_card.dart';
 import 'package:virtual_wardrobe_app/models/outfit_model.dart';
 import 'dart:ui';
@@ -12,8 +13,6 @@ import '../controllers/controller_create_outfit.dart';
 import '../screens/create_outfit_screen.dart';
 import '../screens/outfit_details_screen.dart';
 import '../screens/weekly_challenge_screen.dart';
-import '../widgets/outfit_card.dart';
-import '../widgets/section_title.dart';
 import '../controllers/controller_weather.dart';
 import '../screens/all_outfits_screen.dart';
 import '../providers/favorite_provider.dart';
@@ -62,12 +61,6 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final args = Get.arguments;
-    if (args != null && args is Map && args['reload'] == true) {
-      _refreshOutfits();
-      // Optionally clear the argument to avoid repeated reloads
-      // Get.arguments = null;
-    }
   }
 
   @override
@@ -79,6 +72,18 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  // Future<String> _resolveImageId(String imageId) async {
+  //   if (imageId.isEmpty) return '';
+  //   if (imageId.startsWith('http')) return imageId;
+  //   // Assume it's a Firebase Storage path
+  //   try {
+  //     return await firebase_storage.FirebaseStorage.instance.ref(imageId).getDownloadURL();
+  //   } catch (e) {
+  //     print('Failed to resolve imageId to download URL: $e');
+  //     return '';
+  //   }
+  // }
+
   Future<List<OutfitModel>> fetchMyOutfits() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -89,7 +94,9 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
           .collection('outfits')
           .orderBy('createdAt', descending: true)
           .get();
-      return snapshot.docs.map((doc) => OutfitModel.fromJson(doc.data(), documentId: doc.id)).toList();
+      final rawOutfits = snapshot.docs.map((doc) => OutfitModel.fromJson(doc.data(), documentId: doc.id)).toList();
+      // Do NOT resolve imageId to download URL here; keep the local imageId for local lookup
+      return rawOutfits;
     } catch (e) {
       print('Error fetching outfits: $e');
       return [];
@@ -388,58 +395,87 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
                                   ),
                                   const SizedBox(height: 18.0),
                                   // Recommended Outfits List
-                                  if (filteredRecommended.isEmpty)
-                                    Center(
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.recommend, size: 48, color: colorScheme.primary.withOpacity(0.5)),
-                                          SizedBox(height: 12),
-                                          Text(
-                                            'No recommended outfits',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              color: colorScheme.primary.withOpacity(0.7),
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          SizedBox(height: 4),
-                                          Text(
-                                            'Try adding more outfits for better recommendations.',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: colorScheme.primary.withOpacity(0.5),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  else
-                                    SizedBox(
-                                      height: 310,
-                                      child: ListView.separated(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: filteredRecommended.length,
-                                        separatorBuilder: (_, __) => SizedBox(width: 16),
-                                        itemBuilder: (context, index) {
-                                          final outfit = filteredRecommended[index];
-                                          return FutureBuilder<File?>(
-                                            future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
-                                            builder: (context, imgSnapshot) {
-                                              final imageFile = imgSnapshot.data;
-                                              return SizedBox(
-                                                width: 180,
-                                                child: OutfitCard(
-                                                  outfit: outfit.copyWith(imageId: imageFile?.path ?? ''),
-                                                  onTap: () => Get.to(() => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: imageFile?.path ?? ''))),
+                                  StreamBuilder<Set<String>>(
+                                    stream: FavoriteProvider().favoriteIdsStream,
+                                    builder: (context, favSnapshot) {
+                                      final favoriteIds = favSnapshot.data ?? <String>{};
+                                      if (filteredRecommended.isEmpty)
+                                        return Center(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.recommend, size: 48, color: colorScheme.primary.withOpacity(0.5)),
+                                              SizedBox(height: 12),
+                                              Text(
+                                                'No recommended outfits',
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  color: colorScheme.primary.withOpacity(0.7),
+                                                  fontWeight: FontWeight.w600,
                                                 ),
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ),
+                                              ),
+                                              SizedBox(height: 4),
+                                              Text(
+                                                'Try adding more outfits for better recommendations.',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: colorScheme.primary.withOpacity(0.5),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      return SizedBox(
+                                        height: 310,
+                                        child: ListView.separated(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: filteredRecommended.length,
+                                          separatorBuilder: (_, __) => SizedBox(width: 16),
+                                          itemBuilder: (context, index) {
+                                            final outfit = filteredRecommended[index];
+                                            final isFavorite = favoriteIds.contains(outfit.id);
+                                            return FutureBuilder<File?>(
+                                              future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
+                                              builder: (context, imgSnapshot) {
+                                                final imageFile = imgSnapshot.data;
+                                                String displayImageId = '';
+                                                if (imageFile != null) {
+                                                  displayImageId = imageFile.path;
+                                                } else if (outfit.imageId.startsWith('http')) {
+                                                  displayImageId = outfit.imageId;
+                                                } else {
+                                                  displayImageId = '';
+                                                }
+                                                return SizedBox(
+                                                  width: 180,
+                                                  child: OutfitCard(
+                                                    outfit: outfit.copyWith(imageId: displayImageId),
+                                                    isFavorite: isFavorite,
+                                                    onFavorite: () async {
+                                                      final user = FirebaseAuth.instance.currentUser;
+                                                      if (user == null) return;
+                                                      final favRef = FirebaseFirestore.instance
+                                                          .collection('users')
+                                                          .doc(user.uid)
+                                                          .collection('favourite')
+                                                          .doc(outfit.id);
+                                                      if (isFavorite) {
+                                                        await favRef.delete();
+                                                      } else {
+                                                        await favRef.set(outfit.toJson());
+                                                      }
+                                                    },
+                                                    onTap: () => Get.to(() => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: displayImageId))),
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
                                   const SizedBox(height: 28.0),
                                   // Filter Chips
 
@@ -499,57 +535,86 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
                                   ),
                                   const SizedBox(height: 18.0),
                                   // My Outfits List
-                                  if (filteredOutfits.isEmpty)
-                                    Center(
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.access_time_filled_outlined, size: 48, color: colorScheme.primary.withOpacity(0.5)),
-                                          SizedBox(height: 12),
-                                          Text(
-                                            'No outfits found',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              color: colorScheme.primary.withOpacity(0.7),
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          SizedBox(height: 4),
-                                          Text(
-                                            'Tap + to add your first outfit!',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: colorScheme.primary.withOpacity(0.5),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  else
-                                    SizedBox(
-                                      height: 310,
-                                      child: ListView.separated(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: filteredOutfits.length,
-                                        separatorBuilder: (_, __) => SizedBox(width: 16),
-                                        itemBuilder: (context, index) {
-                                          final outfit = filteredOutfits[index];
-                                          return FutureBuilder<File?>(
-                                            future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
-                                            builder: (context, imgSnapshot) {
-                                              final imageFile = imgSnapshot.data;
-                                              return SizedBox(
-                                                width: 180,
-                                                child: OutfitCard(
-                                                  outfit: outfit.copyWith(imageId: imageFile?.path ?? ''),
-                                                  onTap: () => Get.to(() => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: imageFile?.path ?? ''))),
+                                  StreamBuilder<Set<String>>(
+                                    stream: FavoriteProvider().favoriteIdsStream,
+                                    builder: (context, favSnapshot) {
+                                      final favoriteIds = favSnapshot.data ?? <String>{};
+                                      if (filteredOutfits.isEmpty)
+                                        return Center(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.access_time_filled_outlined, size: 48, color: colorScheme.primary.withOpacity(0.5)),
+                                              SizedBox(height: 12),
+                                              Text(
+                                                'No outfits found',
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  color: colorScheme.primary.withOpacity(0.7),
+                                                  fontWeight: FontWeight.w600,
                                                 ),
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ),
+                                              ),
+                                              SizedBox(height: 4),
+                                              Text(
+                                                'Tap + to add your first outfit!',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: colorScheme.primary.withOpacity(0.5),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      return SizedBox(
+                                        height: 310,
+                                        child: ListView.separated(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: filteredOutfits.length,
+                                          separatorBuilder: (_, __) => SizedBox(width: 16),
+                                          itemBuilder: (context, index) {
+                                            final outfit = filteredOutfits[index];
+                                            final isFavorite = favoriteIds.contains(outfit.id);
+                                            return FutureBuilder<File?>(
+                                              future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
+                                              builder: (context, imgSnapshot) {
+                                                final imageFile = imgSnapshot.data;
+                                                String displayImageId = '';
+                                                if (imageFile != null) {
+                                                  displayImageId = imageFile.path;
+                                                } else if (outfit.imageId.startsWith('http')) {
+                                                  displayImageId = outfit.imageId;
+                                                } else {
+                                                  displayImageId = '';
+                                                }
+                                                return SizedBox(
+                                                  width: 180,
+                                                  child: OutfitCard(
+                                                    outfit: outfit.copyWith(imageId: displayImageId),
+                                                    isFavorite: isFavorite,
+                                                    onFavorite: () async {
+                                                      final user = FirebaseAuth.instance.currentUser;
+                                                      if (user == null) return;
+                                                      final favRef = FirebaseFirestore.instance
+                                                          .collection('users')
+                                                          .doc(user.uid)
+                                                          .collection('favourite')
+                                                          .doc(outfit.id);
+                                                      if (isFavorite) {
+                                                        await favRef.delete();
+                                                      } else {
+                                                        await favRef.set(outfit.toJson());
+                                                      }
+                                                    },
+                                                    onTap: () => Get.to(() => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: displayImageId))),
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
                                   const SizedBox(height: 28.0),
                                   // Recommended Outfits Section Title
 

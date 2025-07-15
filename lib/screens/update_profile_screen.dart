@@ -16,10 +16,17 @@ class UpdateProfileScreen extends StatefulWidget {
 class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   File? _localProfileImage;
   bool _loadingImage = false;
+  late TextEditingController _nameController;
+  String? _selectedGender;
 
   @override
   void initState() {
     super.initState();
+    final controllerUserDetails = Get.find<ControllerUserDetails>();
+    _nameController = TextEditingController(text: controllerUserDetails.userName.value);
+    _selectedGender = controllerUserDetails.userGender.value.isNotEmpty
+        ? controllerUserDetails.userGender.value
+        : null;
     _loadLocalProfileImage();
   }
 
@@ -67,8 +74,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       if (imageId != null) {
         final controllerUserDetails = Get.find<ControllerUserDetails>();
         await controllerUserDetails.updateProfile(
-          name: controllerUserDetails.userName.value,
-          gender: controllerUserDetails.userGender.value,
+          name: _nameController.text,
+          gender: _selectedGender ?? '',
           phone: controllerUserDetails.userPhone.value,
           photoUrlUpdate: imageId,
         );
@@ -79,6 +86,18 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       }
     }
     setState(() { _loadingImage = false; });
+  }
+
+  Future<void> _saveProfile() async {
+    final controllerUserDetails = Get.find<ControllerUserDetails>();
+    await controllerUserDetails.updateProfile(
+      name: _nameController.text,
+      gender: _selectedGender ?? '',
+      phone: controllerUserDetails.userPhone.value,
+      photoUrlUpdate: controllerUserDetails.photoUrl.value,
+    );
+    Get.back();
+    Get.snackbar('Success', 'Profile updated!');
   }
 
   @override
@@ -103,27 +122,47 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                   children: [
                     Obx(() {
                       final controllerUserDetails = Get.find<ControllerUserDetails>();
-                      Widget avatar;
+                      final photoUrl = controllerUserDetails.photoUrl.value;
                       if (_localProfileImage != null) {
-                        avatar = CircleAvatar(
+                        return CircleAvatar(
                           radius: 54,
                           backgroundColor: Colors.lightBlueAccent,
                           backgroundImage: FileImage(_localProfileImage!),
                         );
-                      } else if (controllerUserDetails.photoUrl.value.isNotEmpty) {
-                        avatar = CircleAvatar(
+                      } else if (photoUrl.isNotEmpty && !photoUrl.startsWith('http')) {
+                        return FutureBuilder<Directory>(
+                          future: getApplicationDocumentsDirectory(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                              final file = File('${snapshot.data!.path}/$photoUrl');
+                              if (file.existsSync()) {
+                                return CircleAvatar(
+                                  radius: 54,
+                                  backgroundColor: Colors.lightBlueAccent,
+                                  backgroundImage: FileImage(file),
+                                );
+                              }
+                            }
+                            return const CircleAvatar(
+                              radius: 54,
+                              backgroundColor: Colors.lightBlueAccent,
+                              child: Icon(Icons.person, size: 54, color: Colors.white),
+                            );
+                          },
+                        );
+                      } else if (photoUrl.isNotEmpty) {
+                        return CircleAvatar(
                           radius: 54,
                           backgroundColor: Colors.lightBlueAccent,
-                          backgroundImage: NetworkImage(controllerUserDetails.photoUrl.value),
+                          backgroundImage: NetworkImage(photoUrl),
                         );
                       } else {
-                        avatar = const CircleAvatar(
+                        return const CircleAvatar(
                           radius: 54,
                           backgroundColor: Colors.lightBlueAccent,
-                          backgroundImage: NetworkImage('https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'),
+                          child: Icon(Icons.person, size: 54, color: Colors.white),
                         );
                       }
-                      return avatar;
                     }),
                     Positioned(
                       bottom: 0,
@@ -147,59 +186,72 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              Obx(() => TextFormField(
-                    initialValue: controllerUserDetails.userName.value,
-                    decoration: const InputDecoration(
-                      labelText: 'Name',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.person),
-                    ),
-                    readOnly: true,
-                  )),
-              const SizedBox(height: 16),
-              Obx(() => DropdownButtonFormField<String>(
-                    value: controllerUserDetails.userGender.value.isNotEmpty ? controllerUserDetails.userGender.value : null,
-                    items: (controllerUserDetails.genderOptions ?? ['Male', 'Female', 'Others'])
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      // TODO: Handle gender change logic
-                    },
-                    decoration: const InputDecoration(
-                      labelText: 'Gender',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.transgender),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select your gender';
-                      }
-                      return null;
-                    },
-                  )),
-              const SizedBox(height: 16),
               TextFormField(
-                initialValue: '+92 123 4567890',
+                controller: _nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Phone Number',
+                  labelText: 'Name',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.phone),
+                  prefixIcon: Icon(Icons.person),
                 ),
-                readOnly: true,
               ),
               const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedGender,
+                items: (controllerUserDetails.genderOptions ?? ['Male', 'Female', 'Others'])
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedGender = value;
+                  });
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Gender',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.transgender),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select your gender';
+                  }
+                  return null;
+                },
+              ),
+              // const SizedBox(height: 16),
+              // TextFormField(
+              //   initialValue: '+92 123 4567890',
+              //   decoration: const InputDecoration(
+              //     labelText: 'Phone Number',
+              //     border: OutlineInputBorder(),
+              //     prefixIcon: Icon(Icons.phone),
+              //   ),
+              //   readOnly: true,
+              // ),
+              const SizedBox(height: 16),
               TextFormField(
-                initialValue: 'user@email.com',
+                initialValue: '${controllerUserDetails.userEmail.value}',
                 decoration: const InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.email),
                 ),
                 readOnly: true,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _saveProfile,
+                  icon: const Icon(Icons.save),
+                  label: const Text('Save'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
               SizedBox(

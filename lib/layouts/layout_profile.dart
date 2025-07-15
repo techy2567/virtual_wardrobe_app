@@ -31,7 +31,7 @@ class _LayoutProfileState extends State<LayoutProfile> {
   }
 
   Future<void> _loadLocalProfileImage() async {
-    final controllerUserDetails = Get.find<ControllerUserDetails>();
+    final controllerUserDetails = Get.put(ControllerUserDetails());
     final photoUrl = controllerUserDetails.photoUrl.value;
     if (photoUrl.isNotEmpty && !photoUrl.startsWith('http')) {
       final dir = await getApplicationDocumentsDirectory();
@@ -70,26 +70,43 @@ class _LayoutProfileState extends State<LayoutProfile> {
             children: [
               // Profile Photo with Edit Icon
               Center(
-                child:  Obx(() {
+                child: Obx(() {
                   final controllerUserDetails = Get.find<ControllerUserDetails>();
+                  final photoUrl = controllerUserDetails.photoUrl.value;
                   Widget avatar;
-                  if (_localProfileImage != null) {
-                    avatar = CircleAvatar(
-                      radius: 54,
-                      backgroundColor: Colors.lightBlueAccent,
-                      backgroundImage: FileImage(_localProfileImage!),
+                  if (photoUrl.isNotEmpty && !photoUrl.startsWith('http')) {
+                    // Local file
+                    return FutureBuilder<Directory>(
+                      future: getApplicationDocumentsDirectory(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                          final file = File('${snapshot.data!.path}/$photoUrl');
+                          if (file.existsSync()) {
+                            return CircleAvatar(
+                              radius: 54,
+                              backgroundColor: Colors.lightBlueAccent,
+                              backgroundImage: FileImage(file),
+                            );
+                          }
+                        }
+                        return const CircleAvatar(
+                          radius: 54,
+                          backgroundColor: Colors.lightBlueAccent,
+                          child: Icon(Icons.person, size: 54, color: Colors.white),
+                        );
+                      },
                     );
-                  } else if (controllerUserDetails.photoUrl.value.isNotEmpty) {
+                  } else if (photoUrl.isNotEmpty) {
                     avatar = CircleAvatar(
                       radius: 54,
                       backgroundColor: Colors.lightBlueAccent,
-                      backgroundImage: NetworkImage(controllerUserDetails.photoUrl.value),
+                      backgroundImage: NetworkImage(photoUrl),
                     );
                   } else {
                     avatar = const CircleAvatar(
                       radius: 54,
                       backgroundColor: Colors.lightBlueAccent,
-                      backgroundImage: NetworkImage('https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'),
+                      child: Icon(Icons.person, size: 54, color: Colors.white),
                     );
                   }
                   return avatar;
@@ -125,7 +142,7 @@ class _LayoutProfileState extends State<LayoutProfile> {
                     Obx(() => Text(
                       controllerUserDetails.userEmail.value.isNotEmpty
                           ? controllerUserDetails.userEmail.value
-                          : '-',
+                          : '',
                       style: textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[700]),
                     )),
@@ -137,8 +154,12 @@ class _LayoutProfileState extends State<LayoutProfile> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    Get.to(() => const UpdateProfileScreen());
+                  onPressed: () async {
+                    await Get.to(() => const UpdateProfileScreen());
+                    setState(() {
+                      _localProfileImage = null;
+                    });
+                    await _loadLocalProfileImage();
                   },
                   icon: const Icon(Icons.edit),
                   label: const Text('Edit Profile'),

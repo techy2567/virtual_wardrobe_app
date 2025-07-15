@@ -1,38 +1,35 @@
 class UserModel {
-  final String? id;
-  final String email;
+  final String id;
   final String? name;
+  final String? email;
   final String? gender;
-  final String? photoUrl;
-  final DateTime? createdAt;
+  final DateTime createdAt;
 
   UserModel({
-    this.id,
-    required this.email,
+    required this.id,
     this.name,
+    this.email,
     this.gender,
-    this.photoUrl,
-    this.createdAt,
+    required this.createdAt,
   });
-
-  factory UserModel.fromMap(Map<String, dynamic> map, String id) {
-    return UserModel(
-      id: id,
-      email: map['email'] ?? '',
-      name: map['name']??'',
-      gender: map['gender']??"",
-      photoUrl: map['photoUrl']??'',
-      createdAt: map['createdAt']?.toDate(),
-    );
-  }
 
   Map<String, dynamic> toMap() {
     return {
-      'email': email,
+      'id': id,
       'name': name,
+      'email': email,
       'gender': gender,
-      'photoUrl': photoUrl,
-      'createdAt': createdAt,
+      'createdAt': createdAt.toIso8601String(),
     };
+  }
+
+  factory UserModel.fromMap(Map<String, dynamic> map, String documentId) {
+    return UserModel(
+      id: documentId,
+      name: map['name'],
+      email: map['email'],
+      gender: map['gender'],
+      createdAt: DateTime.parse(map['createdAt']),
+    );
   }
 }

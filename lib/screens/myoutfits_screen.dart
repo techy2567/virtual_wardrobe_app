@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:virtual_wardrobe_app/widgets/outfit_card.dart'; // Import OutfitCard from widgets folder
+import 'package:virtual_wardrobe_app/layouts/outfit_card.dart'; // Import OutfitCard from widgets folder
 import 'package:virtual_wardrobe_app/screens/create_outfit_screen.dart';
 
 import '../models/outfit_model.dart'; // Import CreateOutfitScreen
