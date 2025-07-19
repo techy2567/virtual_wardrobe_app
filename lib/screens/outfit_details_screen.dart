@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:virtual_wardrobe_app/controllers/virtual_try_on_controller.dart';
 import 'package:virtual_wardrobe_app/models/outfit_model.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
@@ -7,15 +8,16 @@ import 'package:virtual_wardrobe_app/screens/donation_screen.dart';
 import 'package:virtual_wardrobe_app/screens/tailor_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:virtual_wardrobe_app/screens/virtual_try_on_screen.dart';
 import '../providers/favorite_provider.dart';
 import 'package:virtual_wardrobe_app/controllers/controller_create_outfit.dart';
 import 'package:virtual_wardrobe_app/screens/home_screen.dart';
-import 'package:virtual_wardrobe_app/screens/virtual_tryon_screen.dart';
+// import 'package:virtual_wardrobe_app/screens/virtual_tryon_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class OutfitDetailsScreen extends StatelessWidget {
   final OutfitModel? outfit;
-  const OutfitDetailsScreen({Key? key, this.outfit}) : super(key: key);
+   OutfitDetailsScreen({Key? key, this.outfit}) : super(key: key);
 
   Future<void> _toggleFavorite(BuildContext context, bool isFavorite) async {
     final user = FirebaseAuth.instance.currentUser;
@@ -31,7 +33,7 @@ class OutfitDetailsScreen extends StatelessWidget {
       await favRef.set(outfit!.toJson());
     }
   }
-
+  Rx<File?> imageFile = Rx<File?>(null);
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -84,6 +86,7 @@ class OutfitDetailsScreen extends StatelessWidget {
           future: ControllerCreateOutfit.getImageFileByIdStatic(liveOutfit.imageId),
           builder: (context, imgSnapshot) {
             final file = imgSnapshot.data;
+            imageFile.value = file;
             final imageProvider = (file != null && file.existsSync())
                 ? FileImage(file) as ImageProvider
                 : AssetImage('assets/images/items/item1.jpeg');
@@ -306,50 +309,38 @@ class OutfitDetailsScreen extends StatelessWidget {
                               ],
                             ),
                             SizedBox(height: 16),
-                            // ElevatedButton.icon(
-                            //   onPressed: (outfit == null || outfit!.imageId.isEmpty) ? null : () async {
-                            //     final imageId = outfit!.imageId;
-                            //     if (imageId.startsWith('http')) {
-                            //       // It's a Firebase Storage download URL
-                            //       Navigator.push(
-                            //         context,
-                            //         MaterialPageRoute(
-                            //           builder: (_) => VirtualTryOnScreen(
-                            //             outfitImagePath: imageId,
-                            //           ),
-                            //         ),
-                            //       );
-                            //     } else {
-                            //       // Try as local file
-                            //       final file = await ControllerCreateOutfit.getImageFileByIdStatic(imageId);
-                            //       if (file != null && await file.exists()) {
-                            //         Navigator.push(
-                            //           context,
-                            //           MaterialPageRoute(
-                            //             builder: (_) => VirtualTryOnScreen(
-                            //               outfitImagePath: file.path,
-                            //             ),
-                            //           ),
-                            //         );
-                            //       } else {
-                            //         ScaffoldMessenger.of(context).showSnackBar(
-                            //           SnackBar(content: Text('Outfit image file or URL not found.')),
-                            //         );
-                            //       }
-                            //     }
-                            //   },
-                            //   icon: Icon(Icons.camera_front),
-                            //   label: Text('Virtual Try-On'),
-                            //   style: ElevatedButton.styleFrom(
-                            //     backgroundColor: colorScheme.primary,
-                            //     foregroundColor: colorScheme.background,
-                            //     minimumSize: const Size(double.infinity, 48.0),
-                            //     shape: RoundedRectangleBorder(
-                            //       borderRadius: BorderRadius.circular(12.0),
-                            //     ),
-                            //     elevation: 2.0,
-                            //   ),
-                            // ),
+                            ElevatedButton.icon(
+                              onPressed: (outfit == null || outfit!.imageId.isEmpty) ? null : () async {
+                                // final imageId = outfit!.imageId;
+                                // final file = await ControllerCreateOutfit.getImageFileByIdStatic(imageId);
+                                if (imageFile.value != null && await imageFile.value!.exists()) {
+                                  Get.put(VirtualTryOnController())..clearData();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => VirtualTryOnScreen(
+                                        productImagePath: imageFile.value!,
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Outfit image file not found.')),
+                                  );
+                                }
+                              },
+                              icon: Icon(Icons.camera_front),
+                              label: Text('Virtual Try-On'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colorScheme.primary,
+                                foregroundColor: colorScheme.surface,
+                                minimumSize: const Size(double.infinity, 48.0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                elevation: 2.0,
+                              ),
+                            ),
                           ],
                         ),
                       ),

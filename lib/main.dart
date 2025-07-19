@@ -73,7 +73,7 @@ class Root extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        if (authController.isLoggedIn) {
+        if (FirebaseAuth.instance.currentUser != null) {
           return  HomeScreen();
         }
         return  SignInScreen();
