@@ -8,7 +8,8 @@ import 'package:virtual_wardrobe_app/screens/auth/signin_screen.dart';
 import 'package:virtual_wardrobe_app/screens/auth/signup_screen.dart';
 import 'package:virtual_wardrobe_app/screens/home_screen.dart';
 import 'controllers/auth_controller.dart';
-
+import 'controllers/controller_weather.dart';
+User? currentUser;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -17,7 +18,9 @@ void main() async {
   await FirebaseAuth.instance.setLanguageCode('en');
 // await FirebaseAuth.instance.signOut();
   // Register AuthController globally
+  currentUser =await  FirebaseAuth.instance.currentUser;
   Get.put(AuthController());
+  Get.put(WeatherController());
 
   runApp( MyApp());
 }
@@ -53,7 +56,7 @@ class MyApp extends StatelessWidget {
           foregroundColor: lightBeige,
         ),
       ),
-      home: Root(), // Use root widget to decide start screen
+      home: (currentUser != null)?HomeScreen():SignInScreen(), // Use root widget to decide start screen
     );
   }
 }
@@ -63,21 +66,26 @@ class Root extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authController = Get.find<AuthController>();
-
-    return FutureBuilder(
-      future: Future.delayed( Duration(milliseconds: 300)),
-      builder: (_, snapshot) {
-        if (authController.isLoading.value || snapshot.connectionState != ConnectionState.done) {
-          return  Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        if (FirebaseAuth.instance.currentUser != null) {
-          return  HomeScreen();
-        }
-        return  SignInScreen();
-      },
-    );
+    if (FirebaseAuth.instance.currentUser != null) {
+      return  HomeScreen();
+    }
+    return  SignInScreen();
   }
+    // final authController = Get.find<AuthController>();
+    //
+    // return FutureBuilder(
+    //   future: Future.delayed( Duration(milliseconds: 300)),
+    //   builder: (_, snapshot) {
+    //     if (authController.isLoading.value || snapshot.connectionState != ConnectionState.done) {
+    //       return  Scaffold(
+    //         body: Center(child: CircularProgressIndicator()),
+    //       );
+    //     }
+    //     if (FirebaseAuth.instance.currentUser != null) {
+    //       return  HomeScreen();
+    //     }
+    //     return  SignInScreen();
+    //   },
+    // );
+  // }
 }

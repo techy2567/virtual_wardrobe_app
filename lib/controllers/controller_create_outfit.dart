@@ -17,7 +17,7 @@ class ControllerCreateOutfit extends GetxController {
   RxString selectedCategory = ''.obs;
   RxString selectedClothingType = ''.obs;
   RxString selectedSeason = ''.obs;
-  RxString selectedGenderType = ''.obs;
+  RxString selectedGenderType = ''.obs; // Only set externally, not by user
 
   // New fields for OutfitModel
   RxString title = ''.obs;
@@ -68,8 +68,6 @@ class ControllerCreateOutfit extends GetxController {
   void selectCategory(String value) => selectedCategory.value = value;
   void selectClothingType(String value) => selectedClothingType.value = value;
   void selectSeason(String value) => selectedSeason.value = value;
-  void selectGenderType(String value) => selectedGenderType.value = value;
-  void toggleDonated(bool value) => isDonated.value = value;
 
   void updateClothingTypeSearch(String query) {
     clothingTypeSearch.value = query;
@@ -139,11 +137,6 @@ class ControllerCreateOutfit extends GetxController {
         isLoading.value = false;
         return false;
       }
-      if (selectedGenderType.value.isEmpty) {
-        Get.snackbar('Validation', 'Please select a type (Men, Women, Other).');
-        isLoading.value = false;
-        return false;
-      }
 
       // Check internet connection
       // (You can use connectivity_plus here if available)
@@ -188,7 +181,7 @@ class ControllerCreateOutfit extends GetxController {
         isFavorite: false,
         isDonated: isDonated.value,
         createdAt: DateTime.now(),
-        genderType: selectedGenderType.value,
+        genderType: selectedGenderType.value, // This will be set from user details in the screen
       );
 
       // Save to Firestore

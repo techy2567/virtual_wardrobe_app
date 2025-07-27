@@ -33,11 +33,11 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
   final Set<String> _favoriteTitles = {};
   late Future<List<OutfitModel>> _myOutfitsFuture;
   List<OutfitModel>? _cachedOutfits;
-  late WeatherController weatherController;
+  WeatherController weatherController = Get.put(WeatherController());
   String _selectedFilter = 'All';
   String _selectedRecommendedFilter = 'All';
   final List<String> _filters = [
-    'All', 'Men', 'Women', 'Other', 'Summer', 'Winter', 'Spring', 'Autumn'
+    'All','Classic', 'Home', 'Outside', 'Casual', 'Sport', 'Festive', 'Summer', 'Winter', 'Spring', 'Autumn'
   ];
   final List<String> _recommendedFilters = [
     'Recommended', 'My Outfits'
@@ -54,8 +54,13 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
     Future.delayed(Duration(milliseconds: 200), () => _challengeAnim.forward());
     Future.delayed(Duration(milliseconds: 400), () => _outfitsAnim.forward());
     Future.delayed(Duration(milliseconds: 600), () => _itemsAnim.forward());
-    weatherController = Get.put(WeatherController());
+    weatherController.weatherData.listen((weather) {
+      if (weather != null && mounted) {
+        setState(() {}); // Trigger rebuild when weather data arrives
+      }
+    });
     _myOutfitsFuture = fetchMyOutfits();
+    // _refreshOutfits();
   }
 
   @override
@@ -108,11 +113,14 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
       _myOutfitsFuture = fetchMyOutfits();
       _cachedOutfits = null;
     });
-    await weatherController.getCurrentLocationAndFetchWeather();
+    // await weatherController.getCurrentLocationAndFetchWeather();
   }
 
   List<OutfitModel> getRecommendedOutfits(List<OutfitModel> outfits) {
-    final temp = weatherController.weatherData.value?.temperature ?? 0.0;
+    final weatherData = weatherController.weatherData.value;
+    if (weatherData == null) return []; // Return empty if no weather data
+
+    final temp = weatherData.temperature;
     // Example: recommend outfits for current temperature
     return outfits.where((o) {
       if (o.weatherRange.contains('Hot') && temp > 25) return true;
@@ -121,7 +129,6 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
       return false;
     }).toList();
   }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -339,144 +346,7 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      SectionTitle(
-                                        key: Key('recommendedOutfitsTitle'),
-                                        title: 'Recommended Outfits',
-                                        onAddPressed: null,
-                                        onViewAllPressed: null,
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          Get.to(() => AllOutfitsScreen(
-                                            title: 'Recommended Outfits',
-                                            showRecommended: true,
-                                          ));
-                                        },
-                                        child: Row(
-                                          children: [
-                                            Text('See All ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                            // Icon(Icons.arrow_forward_ios, size: 12),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8.0),
-                                  // Filter Chips for Recommended Outfits
-                                  SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                      children: _filters.map((filter) {
-                                        final selected = _selectedRecommendedFilter == filter;
-                                        return Padding(
-                                          padding: const EdgeInsets.only(right: 8.0),
-                                          child: ChoiceChip(
-                                            label: Text(filter),
-                                            selected: selected,
-                                            onSelected: (val) {
-                                              setState(() {
-                                                _selectedRecommendedFilter = filter;
-                                              });
-                                            },
-                                            selectedColor: colorScheme.primary,
-                                            backgroundColor: colorScheme.surface,
-                                            labelStyle: TextStyle(
-                                              color: selected ? colorScheme.background : colorScheme.primary,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            checkmarkColor: selected ? colorScheme.background : colorScheme.primary,
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 18.0),
-                                  // Recommended Outfits List
-                                  StreamBuilder<Set<String>>(
-                                    stream: FavoriteProvider().favoriteIdsStream,
-                                    builder: (context, favSnapshot) {
-                                      final favoriteIds = favSnapshot.data ?? <String>{};
-                                      if (filteredRecommended.isEmpty)
-                                        return Center(
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Icon(Icons.recommend, size: 48, color: colorScheme.primary.withOpacity(0.5)),
-                                              SizedBox(height: 12),
-                                              Text(
-                                                'No recommended outfits',
-                                                style: TextStyle(
-                                                  fontSize: 18,
-                                                  color: colorScheme.primary.withOpacity(0.7),
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                              SizedBox(height: 4),
-                                              Text(
-                                                'Try adding more outfits for better recommendations.',
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: colorScheme.primary.withOpacity(0.5),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      return SizedBox(
-                                        height: 310,
-                                        child: ListView.separated(
-                                          scrollDirection: Axis.horizontal,
-                                          itemCount: filteredRecommended.length,
-                                          separatorBuilder: (_, __) => SizedBox(width: 16),
-                                          itemBuilder: (context, index) {
-                                            final outfit = filteredRecommended[index];
-                                            final isFavorite = favoriteIds.contains(outfit.id);
-                                            return FutureBuilder<File?>(
-                                              future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
-                                              builder: (context, imgSnapshot) {
-                                                final imageFile = imgSnapshot.data;
-                                                String displayImageId = '';
-                                                if (imageFile != null) {
-                                                  displayImageId = imageFile.path;
-                                                } else if (outfit.imageId.startsWith('http')) {
-                                                  displayImageId = outfit.imageId;
-                                                } else {
-                                                  displayImageId = '';
-                                                }
-                                                return SizedBox(
-                                                  width: 180,
-                                                  child: OutfitCard(
-                                                    outfit: outfit.copyWith(imageId: displayImageId),
-                                                    isFavorite: isFavorite,
-                                                    onFavorite: () async {
-                                                      final user = FirebaseAuth.instance.currentUser;
-                                                      if (user == null) return;
-                                                      final favRef = FirebaseFirestore.instance
-                                                          .collection('users')
-                                                          .doc(user.uid)
-                                                          .collection('favourite')
-                                                          .doc(outfit.id);
-                                                      if (isFavorite) {
-                                                        await favRef.delete();
-                                                      } else {
-                                                        await favRef.set(outfit.toJson());
-                                                      }
-                                                    },
-                                                    onTap: () => Get.to(() => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: displayImageId))),
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(height: 28.0),
+
                                   // Filter Chips
 
                                   // My Outfits Section Title
@@ -617,7 +487,144 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
                                   ),
                                   const SizedBox(height: 28.0),
                                   // Recommended Outfits Section Title
-
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      SectionTitle(
+                                        key: Key('recommendedOutfitsTitle'),
+                                        title: 'Recommended Outfits',
+                                        onAddPressed: null,
+                                        onViewAllPressed: null,
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Get.to(() => AllOutfitsScreen(
+                                            title: 'Recommended Outfits',
+                                            showRecommended: true,
+                                          ));
+                                        },
+                                        child: Row(
+                                          children: [
+                                            Text('See All ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                            // Icon(Icons.arrow_forward_ios, size: 12),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8.0),
+                                  // Filter Chips for Recommended Outfits
+                                  SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: _filters.map((filter) {
+                                        final selected = _selectedRecommendedFilter == filter;
+                                        return Padding(
+                                          padding: const EdgeInsets.only(right: 8.0),
+                                          child: ChoiceChip(
+                                            label: Text(filter),
+                                            selected: selected,
+                                            onSelected: (val) {
+                                              setState(() {
+                                                _selectedRecommendedFilter = filter;
+                                              });
+                                            },
+                                            selectedColor: colorScheme.primary,
+                                            backgroundColor: colorScheme.surface,
+                                            labelStyle: TextStyle(
+                                              color: selected ? colorScheme.background : colorScheme.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            checkmarkColor: selected ? colorScheme.background : colorScheme.primary,
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 18.0),
+                                  // Recommended Outfits List
+                                  StreamBuilder<Set<String>>(
+                                    stream: FavoriteProvider().favoriteIdsStream,
+                                    builder: (context, favSnapshot) {
+                                      final favoriteIds = favSnapshot.data ?? <String>{};
+                                      if (filteredRecommended.isEmpty)
+                                        return Center(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.recommend, size: 48, color: colorScheme.primary.withOpacity(0.5)),
+                                              SizedBox(height: 12),
+                                              Text(
+                                                'No recommended outfits',
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  color: colorScheme.primary.withOpacity(0.7),
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              SizedBox(height: 4),
+                                              Text(
+                                                'Try adding more outfits for better recommendations.',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: colorScheme.primary.withOpacity(0.5),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      return SizedBox(
+                                        height: 310,
+                                        child: ListView.separated(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: filteredRecommended.length,
+                                          separatorBuilder: (_, __) => SizedBox(width: 16),
+                                          itemBuilder: (context, index) {
+                                            final outfit = filteredRecommended[index];
+                                            final isFavorite = favoriteIds.contains(outfit.id);
+                                            return FutureBuilder<File?>(
+                                              future: ControllerCreateOutfit.getImageFileByIdStatic(outfit.imageId),
+                                              builder: (context, imgSnapshot) {
+                                                final imageFile = imgSnapshot.data;
+                                                String displayImageId = '';
+                                                if (imageFile != null) {
+                                                  displayImageId = imageFile.path;
+                                                } else if (outfit.imageId.startsWith('http')) {
+                                                  displayImageId = outfit.imageId;
+                                                } else {
+                                                  displayImageId = '';
+                                                }
+                                                return SizedBox(
+                                                  width: 180,
+                                                  child: OutfitCard(
+                                                    outfit: outfit.copyWith(imageId: displayImageId),
+                                                    isFavorite: isFavorite,
+                                                    onFavorite: () async {
+                                                      final user = FirebaseAuth.instance.currentUser;
+                                                      if (user == null) return;
+                                                      final favRef = FirebaseFirestore.instance
+                                                          .collection('users')
+                                                          .doc(user.uid)
+                                                          .collection('favourite')
+                                                          .doc(outfit.id);
+                                                      if (isFavorite) {
+                                                        await favRef.delete();
+                                                      } else {
+                                                        await favRef.set(outfit.toJson());
+                                                      }
+                                                    },
+                                                    onTap: () => Get.to(() => OutfitDetailsScreen(outfit: outfit.copyWith(imageId: displayImageId))),
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 28.0),
                                 ],
                               );
                             },

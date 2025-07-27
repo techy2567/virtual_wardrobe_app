@@ -24,7 +24,7 @@ class _AllOutfitsScreenState extends State<AllOutfitsScreen> with SingleTickerPr
   late AnimationController _animController;
   String _selectedFilter = 'All';
   final List<String> _filters = [
-    'All', 'Men', 'Women', 'Other', 'Summer', 'Winter', 'Spring', 'Autumn'
+    'All','Classic', 'Home', 'Outside', 'Casual', 'Sport', 'Festive', 'Summer', 'Winter', 'Spring', 'Autumn'
   ];
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();

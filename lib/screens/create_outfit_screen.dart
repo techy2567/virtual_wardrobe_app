@@ -9,6 +9,7 @@ import 'package:virtual_wardrobe_app/layouts/item_card.dart'; // Import ItemCard
 import 'package:virtual_wardrobe_app/controllers/controller_create_outfit.dart';
 import 'package:path_provider/path_provider.dart';
 import '../layouts/layout_home.dart';
+import 'package:virtual_wardrobe_app/controllers/controller_user_details.dart';
 
 class CreateOutfitScreen extends StatefulWidget {
   CreateOutfitScreen({super.key});
@@ -28,6 +29,11 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
     controller = Get.isRegistered<ControllerCreateOutfit>()
         ? Get.find<ControllerCreateOutfit>()
         : Get.put(ControllerCreateOutfit());
+    // Set gender type from user details
+    final userDetails = Get.isRegistered<ControllerUserDetails>()
+        ? Get.find<ControllerUserDetails>()
+        : Get.put(ControllerUserDetails());
+    controller.selectedGenderType.value = userDetails.userGender.value;
     searchController =
         TextEditingController(text: controller.clothingTypeSearch.value);
     controller.clothingTypeSearch.listen((val) {
@@ -223,39 +229,6 @@ class _CreateOutfitScreenState extends State<CreateOutfitScreen> {
                 onChanged: (value) => controller.description.value = value,
               ),
               SizedBox(height: 16.0),
-              // Gender/Type Selector
-              SectionTitle(title: 'Type (Men, Women, Other)'),
-              SizedBox(height: 8.0),
-              Obx(() =>
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ChoiceChip(
-                        label: Text('Men'),
-                        selected: controller.selectedGenderType.value == 'Men',
-                        onSelected: (selected) {
-                          if (selected) controller.selectGenderType('Men');
-                        },
-                      ),
-                      ChoiceChip(
-                        label: Text('Women'),
-                        selected: controller.selectedGenderType.value ==
-                            'Women',
-                        onSelected: (selected) {
-                          if (selected) controller.selectGenderType('Women');
-                        },
-                      ),
-                      ChoiceChip(
-                        label: Text('Other'),
-                        selected: controller.selectedGenderType.value ==
-                            'Other',
-                        onSelected: (selected) {
-                          if (selected) controller.selectGenderType('Other');
-                        },
-                      ),
-                    ],
-                  )),
-              SizedBox(height: 24.0),
               // Select Season Section
               SectionTitle(title: 'Select Season'),
               SizedBox(height: 16.0),
