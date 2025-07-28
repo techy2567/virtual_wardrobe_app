@@ -243,7 +243,7 @@ class SignUpScreen extends StatelessWidget {
                         Text("Already have an account? ", style: TextStyle(
                             color: colorScheme.primary.withOpacity(0.7))),
                         TextButton(
-                          onPressed: () => Get.to(() => const SignInScreen()),
+                          onPressed: () => Get.back(),
                           child: Text('Sign In', style: TextStyle(
                               color: colorScheme.primary,
                               fontWeight: FontWeight.bold)),

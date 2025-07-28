@@ -245,10 +245,9 @@ class _LayoutProfileState extends State<LayoutProfile> {
                         ),
                   );
                   if (confirmed == true) {
-                    final AuthController authController = Get.find<
-                        AuthController>();
+                    final AuthController authController = Get.find<AuthController>();
                     await authController.logout();
-                    Get.offAll(() => const SignInScreen());
+                    Get.offAllNamed('/login');
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Logged out successfully.')),
                     );

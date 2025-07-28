@@ -52,6 +52,7 @@ class EmailVerificationScreen extends StatelessWidget {
               TextButton(
                 onPressed: () async {
                   await authController.logout();
+                  Get.offAllNamed('/login');
                 },
                 child: const Text('Logout'),
               ),

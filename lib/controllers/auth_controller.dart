@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:virtual_wardrobe_app/screens/home_screen.dart';
 import 'package:virtual_wardrobe_app/models/user_model.dart';
 import 'package:virtual_wardrobe_app/screens/auth/signin_screen.dart';
+import 'package:virtual_wardrobe_app/screens/admin_dashboard_screen.dart';
 
 class AuthController extends GetxController {
   static AuthController get instance => Get.find();
@@ -22,9 +23,13 @@ class AuthController extends GetxController {
 
   var selectedGender = 'Male'.obs; // Observable for selected gender
   final List<String> genderOptions = ['Male', 'Female', 'Others'];
+  
+  // Admin state
+  RxBool isAdmin = false.obs;
+  
   // Getters
   User? get user => _firebaseUser.value;
-  bool get isLoggedIn => _firebaseUser.value != null; // Remove emailVerified check
+  bool get isLoggedIn => _firebaseUser.value != null || isAdmin.value; // Include admin state
 
   void setSelectedGender(String? newValue) {
     selectedGender.value = newValue??'Male';
@@ -37,8 +42,43 @@ class AuthController extends GetxController {
     super.onReady();
   }
 
+  // Check if credentials are admin
+  bool _isAdminCredentials(String email, String password) {
+    return email == 'admin@vwapp.com' && password == '123@vwa';
+  }
+
+  // Admin-specific sign in method that bypasses Firebase completely
+  Future<void> adminSignIn(String email, String password) async {
+    try {
+      isLoading(true);
+      errorMessage.value = '';
+      
+      // Check admin credentials without Firebase
+      if (_isAdminCredentials(email, password)) {
+        isAdmin.value = true;
+        isLoading(false);
+        Get.offAll(() => AdminDashboardScreen());
+        return;
+      } else {
+        errorMessage.value = 'Invalid admin credentials';
+        isAdmin.value = false;
+      }
+    } catch (e) {
+      errorMessage.value = 'Admin login failed';
+      isAdmin.value = false;
+    } finally {
+      isLoading(false);
+    }
+  }
+
   // Updated handler for auth changes: check email verification & navigate accordingly
   void _handleAuthChanged(User? user) async {
+    // If admin is logged in, don't change anything
+    if (isAdmin.value) {
+      return;
+    }
+    
+    // Handle regular user auth changes
     if (user == null) {
       Get.offAll(() => SignInScreen());
     } else {
@@ -195,37 +235,30 @@ class AuthController extends GetxController {
     isLoading.value = false;
   }
 
-  Future<void> loginWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signIn(String email, String password) async {
     try {
       isLoading(true);
-      errorMessage(null);
-
-      final UserCredential cred = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      _firebaseUser.value = cred.user; // Only update state
-      // Navigation is handled by _handleAuthChanged
+      errorMessage.value = '';
+      
+      // Only handle Firebase Auth login for regular users
+      final credential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      _firebaseUser.value = credential.user;
     } on FirebaseAuthException catch (e) {
-      errorMessage(e.message ?? 'Login failed');
-      rethrow;
+      _handleAuthError(e);
     } finally {
       isLoading(false);
     }
   }
 
+  Future<void> signOut() async {
+    await _auth.signOut();
+    _firebaseUser.value = null;
+    isAdmin.value = false;
+  }
+
+  // Add logout method for compatibility with existing code
   Future<void> logout() async {
-    try {
-      await _auth.signOut();
-      _firebaseUser.value = null;
-    } catch (e) {
-      errorMessage('Logout failed');
-      rethrow;
-    }
+    await signOut();
   }
 
   RxString successMessage = ''.obs;

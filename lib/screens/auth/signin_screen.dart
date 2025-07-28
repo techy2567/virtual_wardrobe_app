@@ -98,13 +98,13 @@ class SignInScreen extends StatelessWidget {
               const SizedBox(height: 30),
 
               /// Sign In Button
-              ElevatedButton(
+              Obx(() => ElevatedButton(
                 onPressed: controller.isLoading.value
                     ? null
-                    : () {
-                  controller.loginWithEmailAndPassword(
-                    email: controller.emailController.text.trim(),
-                    password: controller.passwordController.text.trim(),
+                    : () async {
+                  await controller.signIn(
+                    controller.emailController.text.trim(),
+                    controller.passwordController.text.trim(),
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -114,21 +114,38 @@ class SignInScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 child: controller.isLoading.value
                     ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
                     : const Text('Sign In'),
-              ),
+              )),
 
               const SizedBox(height: 20),
+
+              /// Admin Login Button
+              // TextButton(
+              //   onPressed: () => Get.toNamed('/admin-login'),
+              //   child: Text(
+              //     'Admin Login',
+              //     style: TextStyle(
+              //       color: colorScheme.primary,
+              //       fontWeight: FontWeight.w600,
+              //     ),
+              //   ),
+              // ),
+              //
+              // const SizedBox(height: 20),
 
               /// Forgot Password
               TextButton(
