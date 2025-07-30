@@ -1,6 +1,6 @@
 class VirtualTryOnConfig {
   // Replace this with your actual API key from fashn.ai
-  static const String apiKey = 'YOUR_API_KEY';
+  static const String apiKey = 'fa-oNfKj9H7hxB9-L6Q1bZSwwl00IxOTqf4kDPnU';
 
   // API endpoint
   static const String apiUrl = 'https://api.fashn.ai/v1/run';

@@ -42,7 +42,7 @@ dependencies:
   cloud_firestore: any
   url_launcher: ^6.3.2
   image_picker: ^1.1.2
-  skeletonizer: ^2.1.0+1
+  skeletonizer: ^1.4.3
   geolocator: ^14.0.2
   geocoding: ^4.0.0
   path_provider: ^2.1.5

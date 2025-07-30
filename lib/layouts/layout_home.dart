@@ -37,7 +37,15 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
   String _selectedFilter = 'All';
   String _selectedRecommendedFilter = 'All';
   final List<String> _filters = [
-    'All','Classic', 'Home', 'Outside', 'Casual', 'Sport', 'Festive', 'Summer', 'Winter', 'Spring', 'Autumn'
+    'All',
+    // Categories
+    'Classic', 'Home', 'Outside', 'Casual', 'Sport', 'Festive',
+    // Seasons
+    'Summer', 'Winter', 'Spring', 'Autumn',
+    // Clothing Types (most common)
+    'Shirt', 'Pant', 'Dress', 'Jacket', 'Sweater', 'T-shirt', 'Jeans', 'Suit',
+    // Gender
+    'Men', 'Women', 'Other'
   ];
   final List<String> _recommendedFilters = [
     'Recommended', 'My Outfits'
@@ -127,6 +135,72 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
       if (o.weatherRange.contains('Warm') && temp > 15 && temp <= 25) return true;
       if (o.weatherRange.contains('Cold') && temp < 10) return true;
       return false;
+    }).toList();
+  }
+
+  // Enhanced filtering function that checks multiple criteria
+  List<OutfitModel> filterOutfits(List<OutfitModel> outfits, String selectedFilter) {
+    if (selectedFilter == 'All') {
+      return outfits;
+    }
+    
+    // Handle gender-based filtering
+    if (selectedFilter == 'Men' || selectedFilter == 'Women' || selectedFilter == 'Other') {
+      return outfits.where((o) => 
+        (o.genderType ?? '').toLowerCase() == selectedFilter.toLowerCase()
+      ).toList();
+    }
+    
+    // Enhanced filtering for clothing type, category, and season
+    return outfits.where((o) {
+      final filterLower = selectedFilter.toLowerCase();
+      
+      // Check clothing type
+      final clothingTypeMatch = o.clothingType.toLowerCase().contains(filterLower);
+      
+      // Check categories (outfit can have multiple categories)
+      final categoryMatch = o.categories.any((category) => 
+        category.toLowerCase().contains(filterLower)
+      );
+      
+      // Check season
+      final seasonMatch = o.season.toLowerCase().contains(filterLower);
+      
+      // Return true if ANY of the criteria match (OR logic)
+      return clothingTypeMatch || categoryMatch || seasonMatch;
+    }).toList();
+  }
+
+  // Enhanced recommended outfits filtering
+  List<OutfitModel> filterRecommendedOutfits(List<OutfitModel> outfits, String selectedFilter) {
+    if (selectedFilter == 'All') {
+      return outfits;
+    }
+    
+    // Handle gender-based filtering
+    if (selectedFilter == 'Men' || selectedFilter == 'Women' || selectedFilter == 'Other') {
+      return outfits.where((o) => 
+        (o.genderType ?? '').toLowerCase() == selectedFilter.toLowerCase()
+      ).toList();
+    }
+    
+    // Enhanced filtering for clothing type, category, and season
+    return outfits.where((o) {
+      final filterLower = selectedFilter.toLowerCase();
+      
+      // Check clothing type
+      final clothingTypeMatch = o.clothingType.toLowerCase().contains(filterLower);
+      
+      // Check categories (outfit can have multiple categories)
+      final categoryMatch = o.categories.any((category) => 
+        category.toLowerCase().contains(filterLower)
+      );
+      
+      // Check season
+      final seasonMatch = o.season.toLowerCase().contains(filterLower);
+      
+      // Return true if ANY of the criteria match (OR logic)
+      return clothingTypeMatch || categoryMatch || seasonMatch;
     }).toList();
   }
   @override
@@ -324,25 +398,12 @@ class _LayoutHomeState extends State<LayoutHome> with TickerProviderStateMixin {
                                 return Center(child: Text('Failed to load outfits.'));
                               }
                               final outfits = snapshot.data ?? [];
-                              // My Outfits filtering
-                              List<OutfitModel> filteredOutfits = outfits;
-                              if (_selectedFilter != 'All') {
-                                if (_selectedFilter == 'Men' || _selectedFilter == 'Women' || _selectedFilter == 'Other') {
-                                  filteredOutfits = outfits.where((o) => (o.genderType ?? '').toLowerCase() == _selectedFilter.toLowerCase()).toList();
-                                } else {
-                                  filteredOutfits = outfits.where((o) => (o.season).toLowerCase() == _selectedFilter.toLowerCase()).toList();
-                                }
-                              }
-                              // Recommended Outfits filtering
+                              // My Outfits filtering with enhanced logic
+                              List<OutfitModel> filteredOutfits = filterOutfits(outfits, _selectedFilter);
+                              
+                              // Recommended Outfits filtering with enhanced logic
                               List<OutfitModel> recommended = getRecommendedOutfits(outfits);
-                              List<OutfitModel> filteredRecommended = recommended;
-                              if (_selectedRecommendedFilter != 'All') {
-                                if (_selectedRecommendedFilter == 'Men' || _selectedRecommendedFilter == 'Women' || _selectedRecommendedFilter == 'Other') {
-                                  filteredRecommended = recommended.where((o) => (o.genderType ?? '').toLowerCase() == _selectedRecommendedFilter.toLowerCase()).toList();
-                                } else {
-                                  filteredRecommended = recommended.where((o) => (o.season).toLowerCase() == _selectedRecommendedFilter.toLowerCase()).toList();
-                                }
-                              }
+                              List<OutfitModel> filteredRecommended = filterRecommendedOutfits(recommended, _selectedRecommendedFilter);
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [

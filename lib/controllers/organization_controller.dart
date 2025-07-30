@@ -25,11 +25,14 @@ class OrganizationController extends GetxController {
     }
   }
 
-  Future<void> addOrganization(String name, {String? description}) async {
+  Future<void> addOrganization(String name, String phone, String address, String email, {String? description}) async {
     isLoading.value = true;
     try {
       final docRef = await _firestore.collection('organizations').add({
         'name': name,
+        'phone': phone,
+        'address': address,
+        'email': email,
         'description': description,
         'createdAt': DateTime.now().toIso8601String(),
         'updatedAt': null,
@@ -42,11 +45,14 @@ class OrganizationController extends GetxController {
     }
   }
 
-  Future<void> updateOrganization(String id, String name, {String? description}) async {
+  Future<void> updateOrganization(String id, String name, String phone, String address, String email, {String? description}) async {
     isLoading.value = true;
     try {
       await _firestore.collection('organizations').doc(id).update({
         'name': name,
+        'phone': phone,
+        'address': address,
+        'email': email,
         'description': description,
         'updatedAt': DateTime.now().toIso8601String(),
       });

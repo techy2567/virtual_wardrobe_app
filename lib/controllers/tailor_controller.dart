@@ -25,11 +25,15 @@ class TailorController extends GetxController {
     }
   }
 
-  Future<void> addTailor(String name, String organizationId, {String? contact}) async {
+  Future<void> addTailor(String name, String phone, String address, String email, List<String> specialties, String organizationId, {String? contact}) async {
     isLoading.value = true;
     try {
       await _firestore.collection('tailors').add({
         'name': name,
+        'phone': phone,
+        'address': address,
+        'email': email,
+        'specialties': specialties,
         'organizationId': organizationId,
         'contact': contact,
         'createdAt': DateTime.now().toIso8601String(),
@@ -43,11 +47,15 @@ class TailorController extends GetxController {
     }
   }
 
-  Future<void> updateTailor(String id, String name, String organizationId, {String? contact}) async {
+  Future<void> updateTailor(String id, String name, String phone, String address, String email, List<String> specialties, String organizationId, {String? contact}) async {
     isLoading.value = true;
     try {
       await _firestore.collection('tailors').doc(id).update({
         'name': name,
+        'phone': phone,
+        'address': address,
+        'email': email,
+        'specialties': specialties,
         'organizationId': organizationId,
         'contact': contact,
         'updatedAt': DateTime.now().toIso8601String(),

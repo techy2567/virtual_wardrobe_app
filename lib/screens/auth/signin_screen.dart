@@ -134,18 +134,18 @@ class SignInScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               /// Admin Login Button
-              // TextButton(
-              //   onPressed: () => Get.toNamed('/admin-login'),
-              //   child: Text(
-              //     'Admin Login',
-              //     style: TextStyle(
-              //       color: colorScheme.primary,
-              //       fontWeight: FontWeight.w600,
-              //     ),
-              //   ),
-              // ),
-              //
-              // const SizedBox(height: 20),
+              TextButton(
+                onPressed: () => Get.toNamed('/admin-login'),
+                child: Text(
+                  'Admin Login',
+                  style: TextStyle(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 20),
 
               /// Forgot Password
               TextButton(

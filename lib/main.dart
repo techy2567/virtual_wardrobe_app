@@ -12,7 +12,6 @@ import 'package:virtual_wardrobe_app/screens/admin_dashboard_screen.dart';
 import 'package:virtual_wardrobe_app/screens/admin_organization_crud_screen.dart';
 import 'package:virtual_wardrobe_app/screens/admin_tailor_crud_screen.dart';
 import 'package:virtual_wardrobe_app/screens/admin_ui_customization_screen.dart';
-import 'package:virtual_wardrobe_app/screens/admin_user_management_screen.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/controller_weather.dart';
 import 'package:virtual_wardrobe_app/controllers/ui_customization_controller.dart';
@@ -76,7 +75,6 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/admin-organizations', page: () => AdminOrganizationCrudScreen()),
         GetPage(name: '/admin-tailors', page: () => AdminTailorCrudScreen()),
         GetPage(name: '/admin-ui-customization', page: () => AdminUICustomizationScreen()),
-        GetPage(name: '/admin-users', page: () => AdminUserManagementScreen()),
       ],
       theme: ThemeData(
         colorScheme: ColorScheme.light(

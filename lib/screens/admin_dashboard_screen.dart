@@ -60,22 +60,14 @@ class AdminDashboardScreen extends StatelessWidget {
                   minimumSize: Size(double.infinity, 50),
                 ),
               ),
-              // SizedBox(height: 24),
-              // ElevatedButton(
-              //   onPressed: () => Get.toNamed('/admin-ui-customization'),
-              //   child: Text('UI Customization'),
-              //   style: ElevatedButton.styleFrom(
-              //     minimumSize: Size(double.infinity, 50),
-              //   ),
-              // ),
-              // SizedBox(height: 24),
-              // ElevatedButton(
-              //   onPressed: () => Get.toNamed('/admin-users'),
-              //   child: Text('User Management'),
-              //   style: ElevatedButton.styleFrom(
-              //     minimumSize: Size(double.infinity, 50),
-              //   ),
-              // ),
+              SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Get.toNamed('/admin-ui-customization'),
+                child: Text('UI Customization'),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(double.infinity, 50),
+                ),
+              ),
             ],
           ),
         ),

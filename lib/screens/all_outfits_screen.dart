@@ -24,7 +24,15 @@ class _AllOutfitsScreenState extends State<AllOutfitsScreen> with SingleTickerPr
   late AnimationController _animController;
   String _selectedFilter = 'All';
   final List<String> _filters = [
-    'All','Classic', 'Home', 'Outside', 'Casual', 'Sport', 'Festive', 'Summer', 'Winter', 'Spring', 'Autumn'
+    'All',
+    // Categories
+    'Classic', 'Home', 'Outside', 'Casual', 'Sport', 'Festive',
+    // Seasons
+    'Summer', 'Winter', 'Spring', 'Autumn',
+    // Clothing Types (most common)
+    'Shirt', 'Pant', 'Dress', 'Jacket', 'Sweater', 'T-shirt', 'Jeans', 'Suit',
+    // Gender
+    'Men', 'Women', 'Other'
   ];
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
@@ -80,6 +88,39 @@ class _AllOutfitsScreenState extends State<AllOutfitsScreen> with SingleTickerPr
         .map((snapshot) => snapshot.docs.map((doc) => OutfitModel.fromJson(doc.data(), documentId: doc.id)).toList());
   }
 
+  // Enhanced filtering function that checks multiple criteria
+  List<OutfitModel> filterOutfits(List<OutfitModel> outfits, String selectedFilter) {
+    if (selectedFilter == 'All') {
+      return outfits;
+    }
+    
+    // Handle gender-based filtering
+    if (selectedFilter == 'Men' || selectedFilter == 'Women' || selectedFilter == 'Other') {
+      return outfits.where((o) => 
+        (o.genderType ?? '').toLowerCase() == selectedFilter.toLowerCase()
+      ).toList();
+    }
+    
+    // Enhanced filtering for clothing type, category, and season
+    return outfits.where((o) {
+      final filterLower = selectedFilter.toLowerCase();
+      
+      // Check clothing type
+      final clothingTypeMatch = o.clothingType.toLowerCase().contains(filterLower);
+      
+      // Check categories (outfit can have multiple categories)
+      final categoryMatch = o.categories.any((category) => 
+        category.toLowerCase().contains(filterLower)
+      );
+      
+      // Check season
+      final seasonMatch = o.season.toLowerCase().contains(filterLower);
+      
+      // Return true if ANY of the criteria match (OR logic)
+      return clothingTypeMatch || categoryMatch || seasonMatch;
+    }).toList();
+  }
+
   @override
   void dispose() {
     _animController.dispose();
@@ -116,14 +157,8 @@ class _AllOutfitsScreenState extends State<AllOutfitsScreen> with SingleTickerPr
             return Center(child: Text('Failed to load outfits.'));
           }
           final outfits = snapshot.data ?? [];
-          List<OutfitModel> filtered = outfits;
-          if (_selectedFilter != 'All') {
-            if (_selectedFilter == 'Men' || _selectedFilter == 'Women' || _selectedFilter == 'Other') {
-              filtered = filtered.where((o) => (o.genderType ?? '').toLowerCase() == _selectedFilter.toLowerCase()).toList();
-            } else {
-              filtered = filtered.where((o) => (o.season).toLowerCase() == _selectedFilter.toLowerCase()).toList();
-            }
-          }
+          List<OutfitModel> filtered = filterOutfits(outfits, _selectedFilter);
+          
           if (_searchQuery.isNotEmpty) {
             filtered = filtered.where((o) =>
               o.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
